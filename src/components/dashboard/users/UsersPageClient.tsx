@@ -3,52 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Users,
   Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Shield,
-  UserCheck,
-  UserX,
-  Mail,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,9 +20,11 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useUsers } from "@/context/UserContext";
 import { UserFormDialog } from "@/components/dashboard/users/UserFormDialog";
+import { UsersStats } from "@/components/dashboard/users/UsersStats";
+import { UsersFilters } from "@/components/dashboard/users/UsersFilters";
+import { UsersTable } from "@/components/dashboard/users/UsersTable";
+import { UserDetailsDialog } from "@/components/dashboard/users/UserDetailsDialog";
 import { 
-  ROLE_LABELS, 
-  USER_STATUS_LABELS, 
   type User, 
   type UserStatus,
   type UserFormData,
@@ -182,8 +141,7 @@ export default function UsersPage() {
     setIsDeleteOpen(true);
   };
 
-  const handleToggleStatus = async (user: User) => {
-    const newStatus: UserStatus = user.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+  const handleToggleStatus = async (user: User, newStatus: UserStatus) => {
     await changeUserStatus(user.id, newStatus);
   };
 
@@ -275,222 +233,36 @@ export default function UsersPage() {
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card className="surface">
-            <CardContent className="surface-body">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-lg bg-muted">
-                  <Users className="h-5 w-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{totalUsers}</p>
-                  <p className="text-sm text-muted-foreground">Total Usuarios</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="surface">
-            <CardContent className="surface-body">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-lg bg-muted">
-                  <UserCheck className="h-5 w-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{activeUsers}</p>
-                  <p className="text-sm text-muted-foreground">Activos</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="surface">
-            <CardContent className="surface-body">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-lg bg-muted">
-                  <Shield className="h-5 w-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{adminCount}</p>
-                  <p className="text-sm text-muted-foreground">Administradores</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="surface">
-            <CardContent className="surface-body">
-              <div className="flex items-center gap-4">
-                <div className="p-2 rounded-lg bg-muted">
-                  <Users className="h-5 w-5 text-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{managerCount}</p>
-                  <p className="text-sm text-muted-foreground">Gerentes</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <UsersStats
+          totalUsers={totalUsers}
+          activeUsers={activeUsers}
+          adminCount={adminCount}
+          managerCount={managerCount}
+        />
 
-        {/* Filters */}
-        <Card className="surface">
-          <CardContent className="surface-body">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por nombre o correo..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-10 pl-10"
-                />
-              </div>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="h-10 w-full md:w-40">
-                  <SelectValue placeholder="Rol" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los roles</SelectItem>
-                  <SelectItem value="ADMIN">Administrador</SelectItem>
-                  <SelectItem value="MANAGER">Gerente</SelectItem>
-                  <SelectItem value="EMPLOYEE">Empleado</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-10 w-full md:w-40">
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="ACTIVE">Activo</SelectItem>
-                  <SelectItem value="INACTIVE">Inactivo</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspendido</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+        <UsersFilters
+          searchTerm={searchTerm}
+          roleFilter={roleFilter}
+          statusFilter={statusFilter}
+          onSearchChange={setSearchTerm}
+          onRoleFilterChange={setRoleFilter}
+          onStatusFilterChange={setStatusFilter}
+        />
 
-        {/* Users Table */}
-        <Card className="surface">
-          <CardHeader>
-            <CardTitle>Lista de Usuarios</CardTitle>
-            <CardDescription>
-              {filteredUsers.length} usuario{filteredUsers.length !== 1 ? "s" : ""} encontrado{filteredUsers.length !== 1 ? "s" : ""}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {filteredUsers.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Usuario</TableHead>
-                      <TableHead>Correo</TableHead>
-                      <TableHead>Rol</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead>Creado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((u) => (
-                      <TableRow key={u.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback className="bg-primary/10 text-primary">
-                                {getInitials(u.name)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{u.name}</p>
-                              {u.teamId && (
-                                <p className="text-xs text-muted-foreground">
-                                  Equipo: {u.teamId}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Mail className="h-4 w-4 text-muted-foreground" />
-                            {u.email}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={badgeClassName}>
-                            {ROLE_LABELS[u.role]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={badgeClassName}>
-                            {USER_STATUS_LABELS[u.status]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(u.createdAt)}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleView(u)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Ver Detalles
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleEdit(u)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleToggleStatus(u)}>
-                                {u.status === "ACTIVE" ? (
-                                  <>
-                                    <UserX className="mr-2 h-4 w-4" />
-                                    Desactivar
-                                  </>
-                                ) : (
-                                  <>
-                                    <UserCheck className="mr-2 h-4 w-4" />
-                                    Activar
-                                  </>
-                                )}
-                              </DropdownMenuItem>
-                              {u.id !== currentUser?.id && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => handleDeleteClick(u)}
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Users className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium">No hay usuarios</h3>
-                <p className="text-muted-foreground mt-1">
-                  {searchTerm || roleFilter !== "all" || statusFilter !== "all"
-                    ? "No se encontraron usuarios con los filtros aplicados"
-                    : "Aún no se han creado usuarios"}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <UsersTable
+          users={filteredUsers}
+          currentUserId={currentUser?.id}
+          badgeClassName={badgeClassName}
+          searchTerm={searchTerm}
+          roleFilter={roleFilter}
+          statusFilter={statusFilter}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDeleteClick}
+          onToggleStatus={(targetUser, newStatus) => void handleToggleStatus(targetUser, newStatus)}
+          formatDate={formatDate}
+          getInitials={getInitials}
+        />
       </div>
 
       <UserFormDialog
@@ -515,67 +287,14 @@ export default function UsersPage() {
         onSubmit={handleSubmitEdit}
       />
 
-      {/* View Dialog */}
-      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Detalles del Usuario</DialogTitle>
-          </DialogHeader>
-          {selectedUser && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarFallback className="bg-primary/10 text-primary text-xl">
-                    {getInitials(selectedUser.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-lg font-semibold">{selectedUser.name}</h3>
-                  <p className="text-muted-foreground">{selectedUser.email}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Rol</p>
-                  <Badge className={badgeClassName}>
-                    {ROLE_LABELS[selectedUser.role]}
-                  </Badge>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Estado</p>
-                  <Badge className={badgeClassName}>
-                    {USER_STATUS_LABELS[selectedUser.status]}
-                  </Badge>
-                </div>
-              </div>
-
-              {selectedUser.teamId && (
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Equipo</p>
-                  <p className="font-medium">{selectedUser.teamId}</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Creado</p>
-                  <p>{formatDate(selectedUser.createdAt)}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Actualizado</p>
-                  <p>{formatDate(selectedUser.updatedAt)}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <UserDetailsDialog
+        open={isViewOpen}
+        onOpenChange={setIsViewOpen}
+        user={selectedUser}
+        badgeClassName={badgeClassName}
+        formatDate={formatDate}
+        getInitials={getInitials}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

@@ -2,50 +2,9 @@
 
 import { useMemo, useState } from "react";
 import {
-  Calendar,
   Plus,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  Clock,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,7 +20,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useSchedule } from "@/context/ScheduleContext";
 import { useUsers } from "@/context/UserContext";
 import { ScheduleFormDialog } from "@/components/dashboard/schedules/ScheduleFormDialog";
-import { STATUS_LABELS, type Schedule, type ScheduleFormData } from "@/types";
+import { SchedulesFilters } from "@/components/dashboard/schedules/SchedulesFilters";
+import { SchedulesTable } from "@/components/dashboard/schedules/SchedulesTable";
+import { ScheduleDetailsDialog } from "@/components/dashboard/schedules/ScheduleDetailsDialog";
+import { type Schedule, type ScheduleFormData } from "@/types";
 
 export default function SchedulesPage() {
   const { user, hasPermission } = useAuth();
@@ -276,163 +238,29 @@ export default function SchedulesPage() {
           )}
         </div>
 
-        {/* Filters */}
-        <Card className="surface">
-          <CardContent className="surface-body">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar por título o usuario..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="h-10 pl-10"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-10 w-full md:w-48">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filtrar por estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="SCHEDULED">Programado</SelectItem>
-                  <SelectItem value="CONFIRMED">Confirmado</SelectItem>
-                  <SelectItem value="COMPLETED">Completado</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+        <SchedulesFilters
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          onSearchChange={setSearchTerm}
+          onStatusFilterChange={setStatusFilter}
+        />
 
-        {/* Schedules Table */}
-        <Card className="surface">
-          <CardHeader>
-            <CardTitle>Lista de Horarios</CardTitle>
-            <CardDescription>
-              {filteredSchedules.length} horario{filteredSchedules.length !== 1 ? "s" : ""} encontrado{filteredSchedules.length !== 1 ? "s" : ""}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {filteredSchedules.length > 0 ? (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Título</TableHead>
-                      <TableHead>Usuario</TableHead>
-                      <TableHead>Inicio</TableHead>
-                      <TableHead>Fin</TableHead>
-                      <TableHead>Estado</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredSchedules.map((schedule) => {
-                      const assignedUser = usersById.get(schedule.userId);
-                      return (
-                        <TableRow key={schedule.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                <Calendar className="h-5 w-5 text-primary" />
-                              </div>
-                              <div>
-                                <p className="font-medium">{schedule.title}</p>
-                                {schedule.description && (
-                                  <p className="text-sm text-muted-foreground truncate max-w-[200px]">
-                                    {schedule.description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="text-xs">
-                                  {assignedUser ? getInitials(assignedUser.name) : "?"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{assignedUser?.name || "Desconocido"}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              {formatDateTime(schedule.startTime)}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              {formatDateTime(schedule.endTime)}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className={badgeClassName}>
-                              {STATUS_LABELS[schedule.status]}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleView(schedule)}>
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  Ver Detalles
-                                </DropdownMenuItem>
-                                {canEdit && schedule.status !== "CANCELLED" && (
-                                  <DropdownMenuItem onClick={() => handleEdit(schedule)}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Editar
-                                  </DropdownMenuItem>
-                                )}
-                                {canDelete && schedule.status !== "CANCELLED" && (
-                                  <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                      onClick={() => handleDeleteClick(schedule)}
-                                      className="text-destructive focus:text-destructive"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Cancelar
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Calendar className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                <h3 className="text-lg font-medium">No hay horarios</h3>
-                <p className="text-muted-foreground mt-1">
-                  {searchTerm || statusFilter !== "all"
-                    ? "No se encontraron horarios con los filtros aplicados"
-                    : "Aún no se han creado horarios"}
-                </p>
-                {canCreate && !searchTerm && statusFilter === "all" && (
-                  <Button className="mt-4" onClick={handleCreate}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Crear Primer Horario
-                  </Button>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <SchedulesTable
+          schedules={filteredSchedules}
+          usersById={usersById}
+          badgeClassName={badgeClassName}
+          canCreate={canCreate}
+          canEdit={canEdit}
+          canDelete={canDelete}
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          onCreate={handleCreate}
+          onView={handleView}
+          onEdit={handleEdit}
+          onDelete={handleDeleteClick}
+          formatDateTime={formatDateTime}
+          getInitials={getInitials}
+        />
       </div>
 
       <ScheduleFormDialog
@@ -459,76 +287,15 @@ export default function SchedulesPage() {
         onSubmit={handleSubmitEdit}
       />
 
-      {/* View Dialog */}
-      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Detalles del Horario</DialogTitle>
-          </DialogHeader>
-          {selectedSchedule && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-                  <Calendar className="h-7 w-7 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">{selectedSchedule.title}</h3>
-                  <Badge className={badgeClassName}>
-                    {STATUS_LABELS[selectedSchedule.status]}
-                  </Badge>
-                </div>
-              </div>
-              
-              {selectedSchedule.description && (
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">{selectedSchedule.description}</p>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Inicio</p>
-                  <p className="font-medium">{formatDateTime(selectedSchedule.startTime)}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Fin</p>
-                  <p className="font-medium">{formatDateTime(selectedSchedule.endTime)}</p>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Asignado a</p>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {selectedAssignedUser ? getInitials(selectedAssignedUser.name) : "?"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">
-                    {selectedAssignedUser?.name || "Desconocido"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Creado</p>
-                  <p>{formatDateTime(selectedSchedule.createdAt)}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Actualizado</p>
-                  <p>{formatDateTime(selectedSchedule.updatedAt)}</p>
-                </div>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ScheduleDetailsDialog
+        open={isViewOpen}
+        onOpenChange={setIsViewOpen}
+        schedule={selectedSchedule}
+        assignedUser={selectedAssignedUser}
+        badgeClassName={badgeClassName}
+        formatDateTime={formatDateTime}
+        getInitials={getInitials}
+      />
 
       {/* Delete Confirmation */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
