@@ -272,10 +272,10 @@ export default function SchedulesPage() {
   const activeUsers = users.filter(u => u.status === "ACTIVE");
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <AppHeader title="Gestión de Horarios" />
 
-      <div className="flex-1 p-6 space-y-6 overflow-auto">
+      <div className="mx-auto w-full max-w-6xl flex-1 overflow-auto space-y-6 p-5 md:p-6">
         {/* Header Actions */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -285,7 +285,7 @@ export default function SchedulesPage() {
             </p>
           </div>
           {canCreate && (
-            <Button onClick={handleCreate}>
+            <Button className="h-9 px-4" onClick={handleCreate}>
               <Plus className="mr-2 h-4 w-4" />
               Crear Horario
             </Button>
@@ -293,8 +293,8 @@ export default function SchedulesPage() {
         </div>
 
         {/* Filters */}
-        <Card>
-          <CardContent className="p-4">
+        <Card className="border-border bg-card/50">
+          <CardContent className="p-5">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -302,11 +302,11 @@ export default function SchedulesPage() {
                   placeholder="Buscar por título o usuario..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="h-10 pl-10"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full md:w-48">
+                <SelectTrigger className="h-10 w-full md:w-48">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
@@ -323,7 +323,7 @@ export default function SchedulesPage() {
         </Card>
 
         {/* Schedules Table */}
-        <Card>
+        <Card className="border-border bg-card/50">
           <CardHeader>
             <CardTitle>Lista de Horarios</CardTitle>
             <CardDescription>

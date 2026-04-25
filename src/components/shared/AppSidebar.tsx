@@ -26,14 +26,14 @@ export function AppSidebar() {
   };
 
   return (
-    <aside className="w-56 border-r p-4">
-      <div className="mb-4">
-        <Link href="/dashboard" className="text-lg font-semibold">
+    <aside className="w-60 border-r border-border/80 bg-card/40 p-4">
+      <div className="mb-5">
+        <Link href="/dashboard" className="text-lg font-semibold tracking-tight">
           ClockHub
         </Link>
       </div>
 
-      <nav className="space-y-1">
+      <nav className="space-y-1.5">
         {filteredNavigation.map((item) => {
           const isActive = pathname === item.href;
 
@@ -42,8 +42,10 @@ export function AppSidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "block rounded px-2 py-1.5 text-sm",
-                isActive ? "bg-muted font-medium" : "text-muted-foreground hover:text-foreground"
+                "block rounded-md px-3 py-2 text-sm transition-colors",
+                isActive
+                  ? "border border-border bg-muted font-medium text-foreground"
+                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               )}
             >
               {item.name}
@@ -52,8 +54,8 @@ export function AppSidebar() {
         })}
       </nav>
 
-      <div className="mt-6 border-t pt-4">
-        <Button variant="outline" size="sm" className="w-full" onClick={handleLogout}>
+      <div className="mt-6 border-t border-border/80 pt-4">
+        <Button variant="outline" size="sm" className="h-9 w-full" onClick={handleLogout}>
           Cerrar sesión
         </Button>
       </div>

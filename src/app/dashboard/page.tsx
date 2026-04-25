@@ -42,37 +42,38 @@ export default function DashboardPage() {
     <div className="flex h-full flex-col">
       <AppHeader title="Panel" />
 
-      <div className="flex-1 space-y-6 overflow-auto p-4">
-        <section>
-          <h2 className="text-xl font-semibold">Resumen</h2>
-          <p className="text-sm text-muted-foreground">Hola, {user?.name}</p>
+      <div className="flex-1 overflow-auto p-5 md:p-6">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
+        <section className="rounded-md border border-border bg-card/50 p-5">
+          <h2 className="text-2xl font-semibold tracking-tight">Resumen</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Hola, {user?.name}</p>
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded border p-3">
+          <div className="rounded-md border border-border bg-card/40 p-4">
             <p className="text-sm text-muted-foreground">Horarios activos</p>
-            <p className="text-2xl font-semibold">{activeSchedules.length}</p>
+            <p className="mt-1 text-2xl font-semibold">{activeSchedules.length}</p>
           </div>
-          <div className="rounded border p-3">
+          <div className="rounded-md border border-border bg-card/40 p-4">
             <p className="text-sm text-muted-foreground">Confirmados</p>
-            <p className="text-2xl font-semibold">{confirmedSchedules.length}</p>
+            <p className="mt-1 text-2xl font-semibold">{confirmedSchedules.length}</p>
           </div>
-          <div className="rounded border p-3">
+          <div className="rounded-md border border-border bg-card/40 p-4">
             <p className="text-sm text-muted-foreground">Pendientes</p>
-            <p className="text-2xl font-semibold">{pendingSchedules.length}</p>
+            <p className="mt-1 text-2xl font-semibold">{pendingSchedules.length}</p>
           </div>
-          <div className="rounded border p-3">
+          <div className="rounded-md border border-border bg-card/40 p-4">
             <p className="text-sm text-muted-foreground">Usuarios activos</p>
-            <p className="text-2xl font-semibold">{activeUsers.length}</p>
+            <p className="mt-1 text-2xl font-semibold">{activeUsers.length}</p>
           </div>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded border p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-medium">Mis próximos horarios</h3>
+          <div className="rounded-md border border-border bg-card/40 p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-medium tracking-tight">Mis próximos horarios</h3>
               <Link href="/dashboard/horarios">
-                <Button size="sm" variant="outline">Ver todos</Button>
+                <Button size="sm" variant="outline" className="h-8 px-3">Ver todos</Button>
               </Link>
             </div>
             {upcomingSchedules.length === 0 ? (
@@ -80,7 +81,7 @@ export default function DashboardPage() {
             ) : (
               <ul className="space-y-2 text-sm">
                 {upcomingSchedules.map((schedule) => (
-                  <li key={schedule.id} className="rounded border p-2">
+                  <li key={schedule.id} className="rounded-md border border-border/80 bg-background/40 p-3">
                     <p className="font-medium">{schedule.title}</p>
                     <p className="text-muted-foreground">{formatDateTime(schedule.startTime)} - {formatDateTime(schedule.endTime)}</p>
                     <p className="text-xs text-muted-foreground">{STATUS_LABELS[schedule.status]}</p>
@@ -90,12 +91,12 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded border p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-medium">Actividad reciente</h3>
+          <div className="rounded-md border border-border bg-card/40 p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="font-medium tracking-tight">Actividad reciente</h3>
               {hasPermission("canViewAudit") && (
                 <Link href="/dashboard/auditoria">
-                  <Button size="sm" variant="outline">Auditoría</Button>
+                  <Button size="sm" variant="outline" className="h-8 px-3">Auditoría</Button>
                 </Link>
               )}
             </div>
@@ -107,7 +108,7 @@ export default function DashboardPage() {
                   const assignedUser = users.find((u) => u.id === schedule.userId);
 
                   return (
-                    <li key={schedule.id} className="rounded border p-2">
+                    <li key={schedule.id} className="rounded-md border border-border/80 bg-background/40 p-3">
                       <p className="font-medium">{schedule.title}</p>
                       <p className="text-muted-foreground">{assignedUser?.name ?? "Usuario desconocido"}</p>
                       <p className="text-xs text-muted-foreground">{formatDateTime(schedule.updatedAt)}</p>
@@ -118,6 +119,7 @@ export default function DashboardPage() {
             )}
           </div>
         </section>
+        </div>
       </div>
     </div>
   );

@@ -214,10 +214,10 @@ export default function AuditPage() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <AppHeader title="Registro de Auditoría" />
 
-      <div className="flex-1 p-6 space-y-6 overflow-auto">
+      <div className="mx-auto w-full max-w-6xl flex-1 overflow-auto space-y-6 p-5 md:p-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -226,7 +226,7 @@ export default function AuditPage() {
               Registro de todas las acciones del sistema
             </p>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" className="h-9 px-4">
             <RefreshCw className="mr-2 h-4 w-4" />
             Actualizar
           </Button>
@@ -234,8 +234,8 @@ export default function AuditPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardContent className="p-4">
+          <Card className="border-border bg-card/50">
+            <CardContent className="p-5">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-muted">
                   <Calendar className="h-5 w-5 text-foreground" />
@@ -247,8 +247,8 @@ export default function AuditPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
+          <Card className="border-border bg-card/50">
+            <CardContent className="p-5">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-muted">
                   <LogIn className="h-5 w-5 text-foreground" />
@@ -260,8 +260,8 @@ export default function AuditPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
+          <Card className="border-border bg-card/50">
+            <CardContent className="p-5">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-muted">
                   <Edit className="h-5 w-5 text-foreground" />
@@ -276,8 +276,8 @@ export default function AuditPage() {
         </div>
 
         {/* Filters */}
-        <Card>
-          <CardContent className="p-4">
+        <Card className="border-border bg-card/50">
+          <CardContent className="p-5">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -285,11 +285,11 @@ export default function AuditPage() {
                   placeholder="Buscar en el registro..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="h-10 pl-10"
                 />
               </div>
               <Select value={actionFilter} onValueChange={setActionFilter}>
-                <SelectTrigger className="w-full md:w-44">
+                <SelectTrigger className="h-10 w-full md:w-44">
                   <SelectValue placeholder="Acción" />
                 </SelectTrigger>
                 <SelectContent>
@@ -304,7 +304,7 @@ export default function AuditPage() {
                 </SelectContent>
               </Select>
               <Select value={entityFilter} onValueChange={setEntityFilter}>
-                <SelectTrigger className="w-full md:w-40">
+                <SelectTrigger className="h-10 w-full md:w-40">
                   <SelectValue placeholder="Entidad" />
                 </SelectTrigger>
                 <SelectContent>
@@ -319,7 +319,7 @@ export default function AuditPage() {
         </Card>
 
         {/* Audit Logs Table */}
-        <Card>
+        <Card className="border-border bg-card/50">
           <CardHeader>
             <CardTitle>Historial de Eventos</CardTitle>
             <CardDescription>

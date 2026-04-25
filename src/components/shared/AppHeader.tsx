@@ -17,15 +17,15 @@ export function AppHeader({ title }: AppHeaderProps) {
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b px-4">
-      <h1 className="text-base font-semibold">{title ?? "Dashboard"}</h1>
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border/80 bg-background/95 px-5 backdrop-blur">
+      <h1 className="text-base font-semibold tracking-tight">{title ?? "Dashboard"}</h1>
       <div className="flex items-center gap-3 text-sm">
         {user && (
-          <span className="text-muted-foreground">
+          <span className="hidden text-muted-foreground md:inline">
             {user.name} ({ROLE_LABELS[user.role]})
           </span>
         )}
-        <Button variant="outline" size="sm" onClick={handleLogout}>
+        <Button variant="outline" size="sm" className="h-9 px-4" onClick={handleLogout}>
           Cerrar sesión
         </Button>
       </div>

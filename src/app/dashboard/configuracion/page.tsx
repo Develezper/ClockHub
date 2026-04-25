@@ -82,11 +82,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       <AppHeader title="Configuración" />
 
-      <div className="flex-1 p-6 overflow-auto">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="mx-auto w-full max-w-5xl flex-1 overflow-auto p-5 md:p-6">
+        <div className="mx-auto max-w-5xl space-y-6">
           {/* Header */}
           <div>
             <h2 className="text-2xl font-bold text-foreground">Configuración</h2>
@@ -104,7 +104,7 @@ export default function SettingsPage() {
 
           {/* Tabs */}
           <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-4 rounded-md border border-border bg-card/60 p-1">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Perfil</span>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
 
             {/* Profile Tab */}
             <TabsContent value="profile">
-              <Card>
+              <Card className="border-border bg-card/50">
                 <CardHeader>
                   <CardTitle>Información del Perfil</CardTitle>
                   <CardDescription>
@@ -220,7 +220,7 @@ export default function SettingsPage() {
 
             {/* Notifications Tab */}
             <TabsContent value="notifications">
-              <Card>
+              <Card className="border-border bg-card/50">
                 <CardHeader>
                   <CardTitle>Notificaciones</CardTitle>
                   <CardDescription>
@@ -318,7 +318,7 @@ export default function SettingsPage() {
 
             {/* Preferences Tab */}
             <TabsContent value="preferences">
-              <Card>
+              <Card className="border-border bg-card/50">
                 <CardHeader>
                   <CardTitle>Preferencias</CardTitle>
                   <CardDescription>
@@ -418,7 +418,7 @@ export default function SettingsPage() {
 
             {/* Security Tab */}
             <TabsContent value="security">
-              <Card>
+              <Card className="border-border bg-card/50">
                 <CardHeader>
                   <CardTitle>Seguridad</CardTitle>
                   <CardDescription>
@@ -469,7 +469,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
                         <div className="flex items-center gap-4">
                           <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                            <div className="h-3 w-3 rounded-full bg-muted0" />
+                            <div className="h-3 w-3 rounded-full bg-foreground/70" />
                           </div>
                           <div>
                             <p className="font-medium">Sesión Actual</p>
