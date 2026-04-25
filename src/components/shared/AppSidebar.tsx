@@ -5,14 +5,15 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
+import type { UserRole } from "@/types";
 
-const navigation = [
+const navigation: Array<{ name: string; href: string; roles: UserRole[] }> = [
   { name: "Panel", href: "/dashboard", roles: ["ADMIN", "MANAGER", "EMPLOYEE"] },
   { name: "Horarios", href: "/dashboard/horarios", roles: ["ADMIN", "MANAGER", "EMPLOYEE"] },
   { name: "Usuarios", href: "/dashboard/usuarios", roles: ["ADMIN"] },
   { name: "Auditoría", href: "/dashboard/auditoria", roles: ["ADMIN", "MANAGER"] },
   { name: "Configuración", href: "/dashboard/configuracion", roles: ["ADMIN", "MANAGER", "EMPLOYEE"] },
-] as const;
+];
 
 export function AppSidebar() {
   const pathname = usePathname();

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef, type ReactNode } from "react";
 import type { User, UserRole } from "@/types";
 import { ROLE_PERMISSIONS } from "@/types";
 
@@ -31,9 +31,39 @@ interface AuthContextType {
   hasPermission: (permission: keyof typeof ROLE_PERMISSIONS.ADMIN) => boolean;
 }
 
+type AuthState = {
+  user: User | null;
+  isLoading: boolean;
+};
+
+type AuthAction =
+  | { type: "AUTH_START" }
+  | { type: "SET_USER"; payload: User | null }
+  | { type: "AUTH_END" };
+
+const initialState: AuthState = {
+  user: null,
+  isLoading: true,
+};
+
+function authReducer(state: AuthState, action: AuthAction): AuthState {
+  switch (action.type) {
+    case "AUTH_START":
+      return { ...state, isLoading: true };
+    case "SET_USER":
+      return { user: action.payload, isLoading: false };
+    case "AUTH_END":
+      return { ...state, isLoading: false };
+    default:
+      return state;
+  }
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const PERMISSIONS_BY_ROLE: Record<UserRole, typeof ROLE_PERMISSIONS.ADMIN> = {
+type PermissionMap = { [K in keyof typeof ROLE_PERMISSIONS.ADMIN]: boolean };
+
+const PERMISSIONS_BY_ROLE: Record<UserRole, PermissionMap> = {
   ADMIN: {
     canViewAllSchedules: true,
     canCreateSchedules: true,
@@ -88,8 +118,7 @@ async function parseAuthResponse<T>(response: Response): Promise<AuthApiResponse
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, dispatch] = useReducer(authReducer, initialState);
   const authOperationId = useRef(0);
 
   const beginAuthOperation = useCallback(() => {
@@ -114,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const hydrateSession = useCallback(async () => {
     const operationId = beginAuthOperation();
+    dispatch({ type: "AUTH_START" });
 
     try {
       let { response, body } = await readSession();
@@ -131,17 +161,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (response.ok && body.success && body.data?.user) {
-        setUser(toContextUser(body.data.user));
+        dispatch({ type: "SET_USER", payload: toContextUser(body.data.user) });
       } else {
-        setUser(null);
+        dispatch({ type: "SET_USER", payload: null });
       }
     } catch {
       if (isLatestAuthOperation(operationId)) {
-        setUser(null);
-      }
-    } finally {
-      if (isLatestAuthOperation(operationId)) {
-        setIsLoading(false);
+        dispatch({ type: "SET_USER", payload: null });
       }
     }
   }, [beginAuthOperation, isLatestAuthOperation, readSession]);
@@ -153,7 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       const operationId = beginAuthOperation();
-      setIsLoading(true);
+      dispatch({ type: "AUTH_START" });
 
       try {
         const response = await fetch("/api/auth/login", {
@@ -165,20 +191,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const body = await parseAuthResponse<{ user: SessionUser }>(response);
         if (!response.ok || !body.success || !body.data?.user) {
+          dispatch({ type: "AUTH_END" });
           return { success: false, message: body.message || "Credenciales inválidas" };
         }
 
         if (isLatestAuthOperation(operationId)) {
-          setUser(toContextUser(body.data.user));
+          dispatch({ type: "SET_USER", payload: toContextUser(body.data.user) });
         }
 
         return { success: true, message: body.message };
       } catch {
+        dispatch({ type: "AUTH_END" });
         return { success: false, message: "No fue posible iniciar sesión" };
-      } finally {
-        if (isLatestAuthOperation(operationId)) {
-          setIsLoading(false);
-        }
       }
     },
     [beginAuthOperation, isLatestAuthOperation],
@@ -187,7 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(
     async (name: string, email: string, password: string) => {
       const operationId = beginAuthOperation();
-      setIsLoading(true);
+      dispatch({ type: "AUTH_START" });
 
       try {
         const response = await fetch("/api/auth/register", {
@@ -199,28 +223,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const body = await parseAuthResponse<{ user: SessionUser }>(response);
         if (!response.ok || !body.success || !body.data?.user) {
+          dispatch({ type: "AUTH_END" });
           return { success: false, message: body.message || "No fue posible registrarse" };
         }
 
         if (isLatestAuthOperation(operationId)) {
-          setUser(toContextUser(body.data.user));
+          dispatch({ type: "SET_USER", payload: toContextUser(body.data.user) });
         }
 
         return { success: true, message: body.message };
       } catch {
+        dispatch({ type: "AUTH_END" });
         return { success: false, message: "No fue posible registrarse" };
-      } finally {
-        if (isLatestAuthOperation(operationId)) {
-          setIsLoading(false);
-        }
       }
     },
     [beginAuthOperation, isLatestAuthOperation],
   );
 
   const logout = useCallback(async () => {
-    const operationId = beginAuthOperation();
-    setIsLoading(true);
+    dispatch({ type: "AUTH_START" });
 
     try {
       await fetch("/api/auth/logout", {
@@ -228,27 +249,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
     } finally {
-      if (isLatestAuthOperation(operationId)) {
-        setUser(null);
-        setIsLoading(false);
-      }
+      dispatch({ type: "SET_USER", payload: null });
     }
-  }, [beginAuthOperation, isLatestAuthOperation]);
+  }, []);
 
   const hasPermission = useCallback(
     (permission: keyof typeof ROLE_PERMISSIONS.ADMIN) => {
-      if (!user) return false;
-      return PERMISSIONS_BY_ROLE[user.role][permission];
+      if (!state.user) return false;
+      return PERMISSIONS_BY_ROLE[state.user.role][permission];
     },
-    [user],
+    [state.user],
   );
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        isLoading,
-        isAuthenticated: !!user,
+        user: state.user,
+        isLoading: state.isLoading,
+        isAuthenticated: !!state.user,
         login,
         register,
         logout,

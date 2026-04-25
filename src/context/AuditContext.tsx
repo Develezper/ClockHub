@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useEffect, type ReactNode } from "react";
+import { getAuditLogsAction } from "@/actions/audit";
 import type { AuditLog, AuditAction, AuditEntity } from "@/types";
 
 interface AuditContextType {
@@ -8,6 +9,7 @@ interface AuditContextType {
   isLoading: boolean;
   getAuditLogs: (filters?: AuditFilters) => AuditLog[];
   addAuditLog: (log: Omit<AuditLog, "id" | "createdAt">) => void;
+  refreshAuditLogs: () => Promise<void>;
 }
 
 interface AuditFilters {
@@ -18,127 +20,64 @@ interface AuditFilters {
   endDate?: Date;
 }
 
+type AuditState = {
+  auditLogs: AuditLog[];
+  isLoading: boolean;
+};
+
+type AuditActionType =
+  | { type: "LOAD_START" }
+  | { type: "LOAD_SUCCESS"; payload: AuditLog[] }
+  | { type: "LOAD_END" }
+  | { type: "APPEND"; payload: AuditLog };
+
+const initialState: AuditState = {
+  auditLogs: [],
+  isLoading: false,
+};
+
+function auditReducer(state: AuditState, action: AuditActionType): AuditState {
+  switch (action.type) {
+    case "LOAD_START":
+      return { ...state, isLoading: true };
+    case "LOAD_SUCCESS":
+      return { auditLogs: action.payload, isLoading: false };
+    case "LOAD_END":
+      return { ...state, isLoading: false };
+    case "APPEND":
+      return { ...state, auditLogs: [action.payload, ...state.auditLogs] };
+    default:
+      return state;
+  }
+}
+
 const AuditContext = createContext<AuditContextType | undefined>(undefined);
 
-// Datos de demostración
-const INITIAL_AUDIT_LOGS: AuditLog[] = [
-  {
-    id: "1",
-    action: "LOGIN",
-    entity: "AUTH",
-    entityId: "1",
-    userId: "1",
-    metadata: { ip: "192.168.1.1", userAgent: "Chrome" },
-    createdAt: new Date(Date.now() - 3600000),
-  },
-  {
-    id: "2",
-    action: "CREATE",
-    entity: "SCHEDULE",
-    entityId: "1",
-    userId: "2",
-    changes: {
-      title: { old: null, new: "Turno Mañana" },
-      status: { old: null, new: "CONFIRMED" },
-    },
-    createdAt: new Date(Date.now() - 7200000),
-  },
-  {
-    id: "3",
-    action: "UPDATE",
-    entity: "USER",
-    entityId: "3",
-    userId: "1",
-    changes: {
-      role: { old: "EMPLOYEE", new: "MANAGER" },
-    },
-    createdAt: new Date(Date.now() - 86400000),
-  },
-  {
-    id: "4",
-    action: "ROLE_CHANGE",
-    entity: "USER",
-    entityId: "4",
-    userId: "1",
-    changes: {
-      role: { old: "EMPLOYEE", new: "MANAGER" },
-    },
-    createdAt: new Date(Date.now() - 172800000),
-  },
-  {
-    id: "5",
-    action: "DELETE",
-    entity: "SCHEDULE",
-    entityId: "5",
-    userId: "2",
-    changes: {
-      status: { old: "SCHEDULED", new: "CANCELLED" },
-    },
-    createdAt: new Date(Date.now() - 259200000),
-  },
-  {
-    id: "6",
-    action: "CREATE",
-    entity: "USER",
-    entityId: "6",
-    userId: "1",
-    changes: {
-      name: { old: null, new: "Laura Martínez" },
-      email: { old: null, new: "laura.martinez@clockhub.com" },
-      role: { old: null, new: "MANAGER" },
-    },
-    createdAt: new Date(Date.now() - 345600000),
-  },
-  {
-    id: "7",
-    action: "STATUS_CHANGE",
-    entity: "USER",
-    entityId: "5",
-    userId: "1",
-    changes: {
-      status: { old: "ACTIVE", new: "INACTIVE" },
-    },
-    createdAt: new Date(Date.now() - 432000000),
-  },
-  {
-    id: "8",
-    action: "LOGOUT",
-    entity: "AUTH",
-    entityId: "2",
-    userId: "2",
-    metadata: { reason: "user_initiated" },
-    createdAt: new Date(Date.now() - 518400000),
-  },
-  {
-    id: "9",
-    action: "UPDATE",
-    entity: "SCHEDULE",
-    entityId: "2",
-    userId: "1",
-    changes: {
-      startTime: { old: "08:00", new: "09:00" },
-      endTime: { old: "14:00", new: "15:00" },
-    },
-    createdAt: new Date(Date.now() - 604800000),
-  },
-  {
-    id: "10",
-    action: "LOGIN",
-    entity: "AUTH",
-    entityId: "3",
-    userId: "3",
-    metadata: { ip: "192.168.1.50", userAgent: "Firefox" },
-    createdAt: new Date(Date.now() - 691200000),
-  },
-];
-
 export function AuditProvider({ children }: { children: ReactNode }) {
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
-  const [isLoading] = useState(false);
+  const [state, dispatch] = useReducer(auditReducer, initialState);
+
+  const refreshAuditLogs = useCallback(async () => {
+    dispatch({ type: "LOAD_START" });
+
+    try {
+      const response = await getAuditLogsAction();
+      if (response.success && response.data) {
+        dispatch({ type: "LOAD_SUCCESS", payload: response.data });
+      } else {
+        dispatch({ type: "LOAD_END" });
+      }
+    } catch {
+      dispatch({ type: "LOAD_END" });
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshAuditLogs();
+  }, [refreshAuditLogs]);
 
   const getAuditLogs = useCallback(
     (filters?: AuditFilters) => {
-      let filtered = [...auditLogs];
+      let filtered = [...state.auditLogs];
 
       if (filters?.entity) {
         filtered = filtered.filter((log) => log.entity === filters.entity);
@@ -162,26 +101,28 @@ export function AuditProvider({ children }: { children: ReactNode }) {
 
       return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     },
-    [auditLogs]
+    [state.auditLogs],
   );
 
   const addAuditLog = useCallback((log: Omit<AuditLog, "id" | "createdAt">) => {
-    const newLog: AuditLog = {
-      ...log,
-      id: String(Date.now()),
-      createdAt: new Date(),
-    };
-
-    setAuditLogs((prev) => [newLog, ...prev]);
+    dispatch({
+      type: "APPEND",
+      payload: {
+        ...log,
+        id: String(Date.now()),
+        createdAt: new Date(),
+      },
+    });
   }, []);
 
   return (
     <AuditContext.Provider
       value={{
-        auditLogs,
-        isLoading,
+        auditLogs: state.auditLogs,
+        isLoading: state.isLoading,
         getAuditLogs,
         addAuditLog,
+        refreshAuditLogs,
       }}
     >
       {children}

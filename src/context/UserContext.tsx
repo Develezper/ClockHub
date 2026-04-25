@@ -1,239 +1,176 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
+import {
+  changeUserRoleAction,
+  changeUserStatusAction,
+  createUserAction,
+  deleteUserAction,
+  getUsersAction,
+  updateUserAction,
+} from "@/actions/users";
 import type { User, UserFormData, UserRole, UserStatus } from "@/types";
+
+type MutationResult = { success: boolean; message: string };
 
 interface UserContextType {
   users: User[];
   isLoading: boolean;
   getUsers: () => User[];
   getUserById: (id: string) => User | undefined;
-  createUser: (data: UserFormData) => Promise<{ success: boolean; message: string }>;
-  updateUser: (id: string, data: Partial<UserFormData>) => Promise<{ success: boolean; message: string }>;
-  deleteUser: (id: string) => Promise<{ success: boolean; message: string }>;
-  changeUserRole: (id: string, role: UserRole) => Promise<{ success: boolean; message: string }>;
-  changeUserStatus: (id: string, status: UserStatus) => Promise<{ success: boolean; message: string }>;
+  createUser: (data: UserFormData) => Promise<MutationResult>;
+  updateUser: (id: string, data: Partial<UserFormData>) => Promise<MutationResult>;
+  deleteUser: (id: string) => Promise<MutationResult>;
+  changeUserRole: (id: string, role: UserRole) => Promise<MutationResult>;
+  changeUserStatus: (id: string, status: UserStatus) => Promise<MutationResult>;
+  refreshUsers: () => Promise<void>;
+}
+
+type UserState = {
+  users: User[];
+  isLoading: boolean;
+};
+
+type UserAction =
+  | { type: "LOAD_START" }
+  | { type: "LOAD_SUCCESS"; payload: User[] }
+  | { type: "LOAD_END" };
+
+const initialState: UserState = {
+  users: [],
+  isLoading: false,
+};
+
+function userReducer(state: UserState, action: UserAction): UserState {
+  switch (action.type) {
+    case "LOAD_START":
+      return { ...state, isLoading: true };
+    case "LOAD_SUCCESS":
+      return { users: action.payload, isLoading: false };
+    case "LOAD_END":
+      return { ...state, isLoading: false };
+    default:
+      return state;
+  }
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Datos de demostración
-const INITIAL_USERS: User[] = [
-  {
-    id: "1",
-    email: "admin@clockhub.com",
-    name: "Carlos Administrador",
-    role: "ADMIN",
-    status: "ACTIVE",
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-15"),
-  },
-  {
-    id: "2",
-    email: "gerente@clockhub.com",
-    name: "María Gerente",
-    role: "MANAGER",
-    status: "ACTIVE",
-    teamId: "team-1",
-    createdAt: new Date("2024-02-01"),
-    updatedAt: new Date("2024-02-01"),
-  },
-  {
-    id: "3",
-    email: "empleado@clockhub.com",
-    name: "Juan Empleado",
-    role: "EMPLOYEE",
-    status: "ACTIVE",
-    teamId: "team-1",
-    createdAt: new Date("2024-02-15"),
-    updatedAt: new Date("2024-02-15"),
-  },
-  {
-    id: "4",
-    email: "ana.lopez@clockhub.com",
-    name: "Ana López",
-    role: "EMPLOYEE",
-    status: "ACTIVE",
-    teamId: "team-1",
-    createdAt: new Date("2024-03-01"),
-    updatedAt: new Date("2024-03-01"),
-  },
-  {
-    id: "5",
-    email: "pedro.garcia@clockhub.com",
-    name: "Pedro García",
-    role: "EMPLOYEE",
-    status: "INACTIVE",
-    teamId: "team-2",
-    createdAt: new Date("2024-03-15"),
-    updatedAt: new Date("2024-06-01"),
-  },
-  {
-    id: "6",
-    email: "laura.martinez@clockhub.com",
-    name: "Laura Martínez",
-    role: "MANAGER",
-    status: "ACTIVE",
-    teamId: "team-2",
-    createdAt: new Date("2024-04-01"),
-    updatedAt: new Date("2024-04-01"),
-  },
-];
-
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, dispatch] = useReducer(userReducer, initialState);
 
-  const getUsers = useCallback(() => {
-    return users;
-  }, [users]);
+  const refreshUsers = useCallback(async () => {
+    dispatch({ type: "LOAD_START" });
+
+    try {
+      const response = await getUsersAction();
+      if (response.success && response.data) {
+        dispatch({ type: "LOAD_SUCCESS", payload: response.data });
+      } else {
+        dispatch({ type: "LOAD_END" });
+      }
+    } catch {
+      dispatch({ type: "LOAD_END" });
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshUsers();
+  }, [refreshUsers]);
+
+  const getUsers = useCallback(() => state.users, [state.users]);
 
   const getUserById = useCallback(
     (id: string) => {
-      return users.find((u) => u.id === id);
+      return state.users.find((user) => user.id === id);
     },
-    [users]
+    [state.users],
   );
 
-  const createUser = useCallback(
-    async (data: UserFormData) => {
-      setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+  const createUser = useCallback(async (data: UserFormData): Promise<MutationResult> => {
+    dispatch({ type: "LOAD_START" });
 
-      const exists = users.find((u) => u.email === data.email);
-      if (exists) {
-        setIsLoading(false);
-        return { success: false, message: "El correo ya está registrado" };
-      }
+    const response = await createUserAction(data);
+    if (response.success) {
+      await refreshUsers();
+      return { success: true, message: response.message };
+    }
 
-      const newUser: User = {
-        id: String(Date.now()),
-        email: data.email,
-        name: data.name,
-        role: data.role,
-        status: data.status,
-        teamId: data.teamId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+    dispatch({ type: "LOAD_END" });
+    return { success: false, message: response.message };
+  }, [refreshUsers]);
 
-      setUsers((prev) => [...prev, newUser]);
-      setIsLoading(false);
-      return { success: true, message: "Usuario creado exitosamente" };
-    },
-    [users]
-  );
+  const updateUser = useCallback(async (id: string, data: Partial<UserFormData>): Promise<MutationResult> => {
+    const existing = state.users.find((user) => user.id === id);
+    if (!existing) {
+      return { success: false, message: "Usuario no encontrado" };
+    }
 
-  const updateUser = useCallback(
-    async (id: string, data: Partial<UserFormData>) => {
-      setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    dispatch({ type: "LOAD_START" });
 
-      const user = users.find((u) => u.id === id);
-      if (!user) {
-        setIsLoading(false);
-        return { success: false, message: "Usuario no encontrado" };
-      }
+    const response = await updateUserAction({
+      id,
+      name: data.name ?? existing.name,
+      email: data.email ?? existing.email,
+      role: data.role ?? existing.role,
+      status: data.status ?? existing.status,
+      teamId: data.teamId ?? existing.teamId ?? null,
+      password: data.password,
+    });
 
-      if (data.email && data.email !== user.email) {
-        const exists = users.find((u) => u.email === data.email);
-        if (exists) {
-          setIsLoading(false);
-          return { success: false, message: "El correo ya está registrado" };
-        }
-      }
+    if (response.success) {
+      await refreshUsers();
+      return { success: true, message: response.message };
+    }
 
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === id
-            ? {
-                ...u,
-                ...data,
-                updatedAt: new Date(),
-              }
-            : u
-        )
-      );
+    dispatch({ type: "LOAD_END" });
+    return { success: false, message: response.message };
+  }, [refreshUsers, state.users]);
 
-      setIsLoading(false);
-      return { success: true, message: "Usuario actualizado exitosamente" };
-    },
-    [users]
-  );
+  const deleteUser = useCallback(async (id: string): Promise<MutationResult> => {
+    dispatch({ type: "LOAD_START" });
 
-  const deleteUser = useCallback(async (id: string) => {
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const response = await deleteUserAction(id);
+    if (response.success) {
+      await refreshUsers();
+      return { success: true, message: response.message };
+    }
 
-    setUsers((prev) => prev.filter((u) => u.id !== id));
+    dispatch({ type: "LOAD_END" });
+    return { success: false, message: response.message };
+  }, [refreshUsers]);
 
-    setIsLoading(false);
-    return { success: true, message: "Usuario eliminado exitosamente" };
-  }, []);
+  const changeUserRole = useCallback(async (id: string, role: UserRole): Promise<MutationResult> => {
+    dispatch({ type: "LOAD_START" });
 
-  const changeUserRole = useCallback(
-    async (id: string, role: UserRole) => {
-      setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    const response = await changeUserRoleAction({ id, role });
+    if (response.success) {
+      await refreshUsers();
+      return { success: true, message: response.message };
+    }
 
-      const user = users.find((u) => u.id === id);
-      if (!user) {
-        setIsLoading(false);
-        return { success: false, message: "Usuario no encontrado" };
-      }
+    dispatch({ type: "LOAD_END" });
+    return { success: false, message: response.message };
+  }, [refreshUsers]);
 
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === id
-            ? {
-                ...u,
-                role,
-                updatedAt: new Date(),
-              }
-            : u
-        )
-      );
+  const changeUserStatus = useCallback(async (id: string, status: UserStatus): Promise<MutationResult> => {
+    dispatch({ type: "LOAD_START" });
 
-      setIsLoading(false);
-      return { success: true, message: "Rol actualizado exitosamente" };
-    },
-    [users]
-  );
+    const response = await changeUserStatusAction({ id, status });
+    if (response.success) {
+      await refreshUsers();
+      return { success: true, message: response.message };
+    }
 
-  const changeUserStatus = useCallback(
-    async (id: string, status: UserStatus) => {
-      setIsLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const user = users.find((u) => u.id === id);
-      if (!user) {
-        setIsLoading(false);
-        return { success: false, message: "Usuario no encontrado" };
-      }
-
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === id
-            ? {
-                ...u,
-                status,
-                updatedAt: new Date(),
-              }
-            : u
-        )
-      );
-
-      setIsLoading(false);
-      return { success: true, message: "Estado actualizado exitosamente" };
-    },
-    [users]
-  );
+    dispatch({ type: "LOAD_END" });
+    return { success: false, message: response.message };
+  }, [refreshUsers]);
 
   return (
     <UserContext.Provider
       value={{
-        users,
-        isLoading,
+        users: state.users,
+        isLoading: state.isLoading,
         getUsers,
         getUserById,
         createUser,
@@ -241,6 +178,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         deleteUser,
         changeUserRole,
         changeUserStatus,
+        refreshUsers,
       }}
     >
       {children}

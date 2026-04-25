@@ -1,7 +1,7 @@
 import { defineConfig } from "prisma/config";
 
 const bun = (globalThis as typeof globalThis & { Bun?: { env?: Record<string, string | undefined> } }).Bun;
-const databaseUrl = bun?.env?.DATABASE_URL ?? process.env.DATABASE_URL;
+const databaseUrl = bun?.env?.DATABASE_URL;
 
 if (!databaseUrl) {
   throw new Error("Missing DATABASE_URL");

@@ -14,7 +14,7 @@ export type AppEnv = {
 
 function readEnv(key: string): string | undefined {
   const bun = (globalThis as typeof globalThis & { Bun?: { env?: Record<string, string | undefined> } }).Bun;
-  return bun?.env?.[key] ?? process.env[key];
+  return bun?.env?.[key];
 }
 
 function requireEnv(key: string): string {

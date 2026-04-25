@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import type { Prisma } from "@prisma/client";
 
 export async function writeAuditLog(input: {
   action: "LOGIN" | "LOGOUT" | "CREATE" | "UPDATE" | "DELETE" | "ROLE_CHANGE";
@@ -6,7 +7,7 @@ export async function writeAuditLog(input: {
   entity: string;
   entityId?: string;
   message: string;
-  meta?: Record<string, unknown>;
+  meta?: Prisma.InputJsonValue;
 }) {
   try {
     await db.auditLog.create({

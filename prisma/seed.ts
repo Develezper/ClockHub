@@ -4,14 +4,46 @@ import { hashPassword } from "../src/lib/hash";
 
 const prisma = new PrismaClient();
 
+type SeedConfig = {
+  adminEmail?: string;
+  adminPassword?: string;
+};
+
 function getEnv(key: string): string | undefined {
   const bun = (globalThis as typeof globalThis & { Bun?: { env?: Record<string, string | undefined> } }).Bun;
-  return bun?.env?.[key] ?? process.env[key];
+  return bun?.env?.[key];
+}
+
+async function readSeedConfig(): Promise<SeedConfig | null> {
+  const bun = (globalThis as typeof globalThis & {
+    Bun?: {
+      file: (path: string) => { exists: () => Promise<boolean>; text: () => Promise<string> };
+    };
+  }).Bun;
+
+  if (!bun?.file) {
+    return null;
+  }
+
+  const file = bun.file("prisma/seed.admin.json");
+  if (!(await file.exists())) {
+    return null;
+  }
+
+  try {
+    const content = await file.text();
+    const parsed = JSON.parse(content) as SeedConfig;
+    return parsed;
+  } catch {
+    return null;
+  }
 }
 
 async function main() {
-  const adminEmail = getEnv("ADMIN_EMAIL");
-  const adminPassword = getEnv("ADMIN_PASSWORD");
+  const config = await readSeedConfig();
+
+  const adminEmail = config?.adminEmail ?? getEnv("ADMIN_EMAIL");
+  const adminPassword = config?.adminPassword ?? getEnv("ADMIN_PASSWORD");
 
   if (!adminEmail || !adminPassword) {
     console.warn("ADMIN_EMAIL o ADMIN_PASSWORD no definidos; se omite seed de admin");
