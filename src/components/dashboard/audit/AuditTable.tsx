@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/dashboard/common/EmptyState";
 import { AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS, type AuditAction, type AuditLog, type User } from "@/types";
 import type { LucideIcon } from "lucide-react";
 
@@ -109,15 +110,15 @@ export function AuditTable({
             </Table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <ClipboardList className="mb-4 h-16 w-16 text-muted-foreground/50" />
-            <h3 className="text-lg font-medium">No hay eventos</h3>
-            <p className="mt-1 text-muted-foreground">
-              {searchTerm || actionFilter !== "all" || entityFilter !== "all"
+          <EmptyState
+            icon={ClipboardList}
+            title="No hay eventos"
+            description={
+              searchTerm || actionFilter !== "all" || entityFilter !== "all"
                 ? "No se encontraron eventos con los filtros aplicados"
-                : "No hay eventos de auditoría registrados"}
-            </p>
-          </div>
+                : "No hay eventos de auditoría registrados"
+            }
+          />
         )}
       </CardContent>
     </Card>

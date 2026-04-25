@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
+import { getInitials } from "@/lib/format";
 import { ROLE_LABELS } from "@/types";
 
 export default function SettingsPage() {
@@ -56,15 +57,6 @@ export default function SettingsPage() {
     dateFormat: "DD/MM/YYYY",
     theme: "system",
   });
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const handleSave = async () => {
     setIsSaving(true);

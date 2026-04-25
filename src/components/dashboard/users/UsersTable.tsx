@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/dashboard/common/EmptyState";
 import { ROLE_LABELS, USER_STATUS_LABELS, type User, type UserStatus } from "@/types";
 
 type UsersTableProps = {
@@ -145,15 +146,15 @@ export function UsersTable({
             </Table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Users className="mb-4 h-16 w-16 text-muted-foreground/50" />
-            <h3 className="text-lg font-medium">No hay usuarios</h3>
-            <p className="mt-1 text-muted-foreground">
-              {searchTerm || roleFilter !== "all" || statusFilter !== "all"
+          <EmptyState
+            icon={Users}
+            title="No hay usuarios"
+            description={
+              searchTerm || roleFilter !== "all" || statusFilter !== "all"
                 ? "No se encontraron usuarios con los filtros aplicados"
-                : "Aún no se han creado usuarios"}
-            </p>
-          </div>
+                : "Aún no se han creado usuarios"
+            }
+          />
         )}
       </CardContent>
     </Card>

@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { EmptyState } from "@/components/dashboard/common/EmptyState";
 import { STATUS_LABELS, type Schedule, type User } from "@/types";
 
 type SchedulesTableProps = {
@@ -157,21 +158,23 @@ export function SchedulesTable({
             </Table>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Calendar className="mb-4 h-16 w-16 text-muted-foreground/50" />
-            <h3 className="text-lg font-medium">No hay horarios</h3>
-            <p className="mt-1 text-muted-foreground">
-              {searchTerm || statusFilter !== "all"
+          <EmptyState
+            icon={Calendar}
+            title="No hay horarios"
+            description={
+              searchTerm || statusFilter !== "all"
                 ? "No se encontraron horarios con los filtros aplicados"
-                : "Aún no se han creado horarios"}
-            </p>
-            {canCreate && !searchTerm && statusFilter === "all" && (
-              <Button className="mt-4" onClick={onCreate}>
-                <Plus className="mr-2 h-4 w-4" />
-                Crear Primer Horario
-              </Button>
-            )}
-          </div>
+                : "Aún no se han creado horarios"
+            }
+            action={
+              canCreate && !searchTerm && statusFilter === "all" ? (
+                <Button onClick={onCreate}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Crear Primer Horario
+                </Button>
+              ) : null
+            }
+          />
         )}
       </CardContent>
     </Card>

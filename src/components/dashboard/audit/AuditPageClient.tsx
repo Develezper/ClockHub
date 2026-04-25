@@ -18,6 +18,8 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useAudit } from "@/hooks/use-audit";
 import { useUsers } from "@/context/UserContext";
+import { formatDateTimeEs, getInitials } from "@/lib/format";
+import { SectionHeader } from "@/components/dashboard/common/SectionHeader";
 import { AuditDetailModal } from "@/components/dashboard/audit/AuditDetailModal";
 import { AuditStats } from "@/components/dashboard/audit/AuditStats";
 import { AuditFilters } from "@/components/dashboard/audit/AuditFilters";
@@ -76,15 +78,7 @@ export default function AuditPage() {
     });
   }, [auditLogs, searchTerm, actionFilter, entityFilter, usersById]);
 
-  const formatDateTime = (date: Date) => {
-    return new Date(date).toLocaleString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const formatDateTime = (date: Date) => formatDateTimeEs(date);
 
   const formatRelativeTime = (date: Date) => {
     const now = new Date();
@@ -124,15 +118,6 @@ export default function AuditPage() {
   const actionBadgeClass = "bg-muted text-foreground";
   const entityBadgeClass = "bg-muted text-foreground border-border";
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const handleViewDetail = (log: AuditLog) => {
     setSelectedLog(log);
     setIsDetailOpen(true);
@@ -169,19 +154,16 @@ export default function AuditPage() {
       <AppHeader title="Registro de Auditoría" />
 
       <div className="page-shell page-stack">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="page-heading">Auditoría</h2>
-            <p className="page-subheading">
-              Registro de todas las acciones del sistema
-            </p>
-          </div>
-          <Button variant="outline" className="h-9 px-4" onClick={() => void refreshAuditLogs()}>
-            <RefreshCw className="mr-2 h-4 w-4" />
-            Actualizar
-          </Button>
-        </div>
+        <SectionHeader
+          title="Auditoría"
+          subtitle="Registro de todas las acciones del sistema"
+          actions={
+            <Button variant="outline" className="h-9 px-4" onClick={() => void refreshAuditLogs()}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Actualizar
+            </Button>
+          }
+        />
 
         <AuditStats todayLogs={todayLogs} loginCount={loginCount} changeCount={changeCount} />
 

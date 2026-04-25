@@ -19,6 +19,8 @@ import {
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useUsers } from "@/context/UserContext";
+import { formatDateEs, getInitials } from "@/lib/format";
+import { SectionHeader } from "@/components/dashboard/common/SectionHeader";
 import { UserFormDialog } from "@/components/dashboard/users/UserFormDialog";
 import { UsersStats } from "@/components/dashboard/users/UsersStats";
 import { UsersFilters } from "@/components/dashboard/users/UsersFilters";
@@ -83,24 +85,7 @@ export default function UsersPage() {
     });
   }, [users, searchTerm, roleFilter, statusFilter]);
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   const badgeClassName = "bg-muted text-foreground";
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const resetForm = () => {
     setFormData({
@@ -219,19 +204,16 @@ export default function UsersPage() {
       <AppHeader title="Gestión de Usuarios" />
 
       <div className="page-shell page-stack">
-        {/* Header Actions */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="page-heading">Usuarios</h2>
-            <p className="page-subheading">
-              Gestiona los usuarios y sus permisos
-            </p>
-          </div>
-          <Button className="h-9 px-4" onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Crear Usuario
-          </Button>
-        </div>
+        <SectionHeader
+          title="Usuarios"
+          subtitle="Gestiona los usuarios y sus permisos"
+          actions={
+            <Button className="h-9 px-4" onClick={handleCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Crear Usuario
+            </Button>
+          }
+        />
 
         <UsersStats
           totalUsers={totalUsers}
@@ -260,7 +242,7 @@ export default function UsersPage() {
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           onToggleStatus={(targetUser, newStatus) => void handleToggleStatus(targetUser, newStatus)}
-          formatDate={formatDate}
+          formatDate={formatDateEs}
           getInitials={getInitials}
         />
       </div>
@@ -292,7 +274,7 @@ export default function UsersPage() {
         onOpenChange={setIsViewOpen}
         user={selectedUser}
         badgeClassName={badgeClassName}
-        formatDate={formatDate}
+        formatDate={formatDateEs}
         getInitials={getInitials}
       />
 

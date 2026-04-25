@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useSchedule } from "@/context/ScheduleContext";
 import { useUsers } from "@/context/UserContext";
+import { formatDateTimeEs } from "@/lib/format";
 import { STATUS_LABELS } from "@/types";
 
 export default function DashboardPage() {
@@ -30,7 +31,7 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   const formatDateTime = (date: Date) =>
-    new Date(date).toLocaleString("es-ES", {
+    formatDateTimeEs(date, {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",

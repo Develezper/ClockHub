@@ -19,6 +19,8 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useSchedule } from "@/context/ScheduleContext";
 import { useUsers } from "@/context/UserContext";
+import { formatDateTimeEs, getInitials } from "@/lib/format";
+import { SectionHeader } from "@/components/dashboard/common/SectionHeader";
 import { ScheduleFormDialog } from "@/components/dashboard/schedules/ScheduleFormDialog";
 import { SchedulesFilters } from "@/components/dashboard/schedules/SchedulesFilters";
 import { SchedulesTable } from "@/components/dashboard/schedules/SchedulesTable";
@@ -89,15 +91,14 @@ export default function SchedulesPage() {
       .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
   }, [schedules, canViewAll, user, usersById, searchTerm, statusFilter]);
 
-  const formatDateTime = (date: Date) => {
-    return new Date(date).toLocaleString("es-ES", {
+  const formatDateTime = (date: Date) =>
+    formatDateTimeEs(date, {
       weekday: "short",
       day: "numeric",
       month: "short",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
   const formatDateForInput = (date: Date) => {
     const d = new Date(date);
@@ -105,15 +106,6 @@ export default function SchedulesPage() {
   };
 
   const badgeClassName = "bg-muted text-foreground";
-
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const resetForm = () => {
     setFormData({
@@ -222,21 +214,18 @@ export default function SchedulesPage() {
       <AppHeader title="Gestión de Horarios" />
 
       <div className="page-shell page-stack">
-        {/* Header Actions */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h2 className="page-heading">Horarios</h2>
-            <p className="page-subheading">
-              {canViewAll ? "Gestiona todos los horarios del equipo" : "Visualiza tus horarios asignados"}
-            </p>
-          </div>
-          {canCreate && (
-            <Button className="h-9 px-4" onClick={handleCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Crear Horario
-            </Button>
-          )}
-        </div>
+        <SectionHeader
+          title="Horarios"
+          subtitle={canViewAll ? "Gestiona todos los horarios del equipo" : "Visualiza tus horarios asignados"}
+          actions={
+            canCreate ? (
+              <Button className="h-9 px-4" onClick={handleCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                Crear Horario
+              </Button>
+            ) : null
+          }
+        />
 
         <SchedulesFilters
           searchTerm={searchTerm}
