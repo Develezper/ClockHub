@@ -64,13 +64,13 @@ export default function SettingsPage() {
     setIsSaving(true);
     setSuccessMessage("");
     
-    // Simulate save
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // TODO: Conectar con endpoint de actualización de perfil
+    await new Promise((resolve) => setTimeout(resolve, 500));
     
-    setSuccessMessage("Configuración guardada exitosamente");
+    setSuccessMessage("Vista previa de configuración — la persistencia se implementará en una futura iteración");
     setIsSaving(false);
     
-    setTimeout(() => setSuccessMessage(""), 3000);
+    setTimeout(() => setSuccessMessage(""), 4000);
   };
 
   return (

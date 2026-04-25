@@ -1,6 +1,9 @@
 import { AuditAction, PrismaClient, Role, ScheduleStatus, UserStatus } from "@prisma/client";
 import { readFile } from "node:fs/promises";
-import { hashPassword } from "../src/lib/auth";
+import { hash } from "bcryptjs";
+
+const BCRYPT_ROUNDS = 12;
+const hashPassword = (password: string) => hash(password, BCRYPT_ROUNDS);
 
 const prisma = new PrismaClient();
 
