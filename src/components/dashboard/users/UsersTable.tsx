@@ -1,6 +1,7 @@
 "use client";
 
 import { Edit, Eye, Mail, MoreHorizontal, Trash2, UserCheck, UserX, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +73,7 @@ export function UsersTable({
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
-                          <AvatarFallback className="bg-primary/10 text-primary">{getInitials(u.name)}</AvatarFallback>
+                          <AvatarFallback className="bg-white/10 text-muted-foreground">{getInitials(u.name)}</AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-medium">{u.name}</p>
@@ -87,10 +88,26 @@ export function UsersTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={USER_ROLE_BADGE_CLASS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "h-2.5 w-2.5 rounded-full",
+                          u.role === 'ADMIN' && "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]",
+                          u.role === 'MANAGER' && "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.6)]",
+                          u.role === 'EMPLOYEE' && "bg-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.6)]"
+                        )} />
+                        <span className="text-sm font-medium">{ROLE_LABELS[u.role]}</span>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={USER_STATUS_BADGE_CLASS[u.status]}>{USER_STATUS_LABELS[u.status]}</Badge>
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "h-2.5 w-2.5 rounded-full",
+                          u.status === 'ACTIVE' && "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]",
+                          u.status === 'INACTIVE' && "bg-zinc-500 shadow-[0_0_12px_rgba(113,113,122,0.6)]",
+                          u.status === 'SUSPENDED' && "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.6)]"
+                        )} />
+                        <span className="text-sm font-medium">{USER_STATUS_LABELS[u.status]}</span>
+                      </div>
                     </TableCell>
                     <TableCell>{formatDate(u.createdAt)}</TableCell>
                     <TableCell className="text-right">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth, useSchedule, useUsers } from "@/hooks";
 import { formatDateTimeEs } from "@/lib/format";
@@ -51,19 +51,19 @@ export default function DashboardPage() {
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="surface p-4">
+          <div className="surface p-5 flex flex-col items-center justify-center text-center">
             <p className="text-sm text-emerald-300">Horarios activos</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-200">{activeSchedules.length}</p>
           </div>
-          <div className="surface p-4">
+          <div className="surface p-5 flex flex-col items-center justify-center text-center">
             <p className="text-sm text-rose-300">Cancelados</p>
             <p className="mt-1 text-2xl font-semibold text-rose-200">{cancelledSchedules.length}</p>
           </div>
-          <div className="surface p-4">
+          <div className="surface p-5 flex flex-col items-center justify-center text-center">
             <p className="text-sm text-emerald-300">Pendientes</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-200">{pendingSchedules.length}</p>
           </div>
-          <div className="surface p-4">
+          <div className="surface p-5 flex flex-col items-center justify-center text-center">
             <p className="text-sm text-emerald-300">Usuarios activos</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-200">{activeUsers.length}</p>
           </div>
@@ -85,9 +85,13 @@ export default function DashboardPage() {
                   <li key={schedule.id} className="rounded-md border border-border/80 bg-background/40 p-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="font-medium">{schedule.title}</p>
-                      <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
-                        {STATUS_LABELS[schedule.status]}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "h-2.5 w-2.5 rounded-full",
+                          schedule.status === 'SCHEDULED' ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]" : "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
+                        )} />
+                        <span className="text-xs font-medium text-foreground">{STATUS_LABELS[schedule.status]}</span>
+                      </div>
                     </div>
                     <p className="text-muted-foreground">{formatDateTime(schedule.startTime)} - {formatDateTime(schedule.endTime)}</p>
                   </li>
@@ -116,9 +120,13 @@ export default function DashboardPage() {
                     <li key={schedule.id} className="rounded-md border border-border/80 bg-background/40 p-3">
                       <div className="flex items-center justify-between gap-3">
                         <p className="font-medium">{schedule.title}</p>
-                        <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
-                          {STATUS_LABELS[schedule.status]}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            schedule.status === 'SCHEDULED' ? "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]" : "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
+                          )} />
+                          <span className="text-xs font-medium text-foreground">{STATUS_LABELS[schedule.status]}</span>
+                        </div>
                       </div>
                       <p className="text-muted-foreground">{assignedUser?.name ?? "Usuario desconocido"}</p>
                       <p className="text-xs text-muted-foreground">{formatDateTime(schedule.updatedAt)}</p>

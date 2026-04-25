@@ -15,8 +15,8 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
     <div className="grid gap-4 md:grid-cols-4">
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(148,163,184,0.4)] bg-[rgba(148,163,184,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <Users className="h-5 w-5 text-slate-300" />
             </div>
             <div>
@@ -29,8 +29,8 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
 
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <UserCheck className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
@@ -43,8 +43,8 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
 
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(251,113,133,0.4)] bg-[rgba(251,113,133,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <Shield className="h-5 w-5 text-rose-300" />
             </div>
             <div>
@@ -57,8 +57,8 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
 
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(251,191,36,0.4)] bg-[rgba(251,191,36,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <Users className="h-5 w-5 text-amber-300" />
             </div>
             <div>

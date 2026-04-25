@@ -14,8 +14,8 @@ export function AuditStats({ todayLogs, loginCount, changeCount }: AuditStatsPro
     <div className="grid gap-4 md:grid-cols-3">
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(148,163,184,0.4)] bg-[rgba(148,163,184,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <Calendar className="h-5 w-5 text-slate-300" />
             </div>
             <div>
@@ -28,8 +28,8 @@ export function AuditStats({ todayLogs, loginCount, changeCount }: AuditStatsPro
 
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <LogIn className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
@@ -42,8 +42,8 @@ export function AuditStats({ todayLogs, loginCount, changeCount }: AuditStatsPro
 
       <Card className="surface">
         <CardContent className="surface-body">
-          <div className="flex items-center gap-4">
-            <div className="rounded-lg border border-[rgba(125,211,252,0.4)] bg-[rgba(125,211,252,0.2)] p-2">
+          <div className="flex flex-col items-center justify-center text-center gap-3">
+            <div className="rounded-lg border border-white/10 bg-transparent p-2">
               <Edit className="h-5 w-5 text-sky-300" />
             </div>
             <div>

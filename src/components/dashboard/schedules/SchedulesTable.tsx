@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, Clock, Edit, Eye, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ export function SchedulesTable({
                     <TableRow key={schedule.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-transparent">
                             <Calendar className="h-5 w-5 text-primary" />
                           </div>
                           <div>
@@ -93,7 +94,7 @@ export function SchedulesTable({
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">{assignedUser ? getInitials(assignedUser.name) : "?"}</AvatarFallback>
+                            <AvatarFallback className="bg-white/10 text-xs text-muted-foreground">{assignedUser ? getInitials(assignedUser.name) : "?"}</AvatarFallback>
                           </Avatar>
                           <span>{assignedUser?.name || "Desconocido"}</span>
                         </div>
@@ -114,9 +115,14 @@ export function SchedulesTable({
                       </TableCell>
 
                       <TableCell>
-                        <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
-                          {STATUS_LABELS[schedule.status]}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <div className={cn(
+                            "h-2.5 w-2.5 rounded-full",
+                            schedule.status === 'SCHEDULED' && "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]",
+                            schedule.status === 'CANCELLED' && "bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]"
+                          )} />
+                          <span className="text-sm font-medium">{STATUS_LABELS[schedule.status]}</span>
+                        </div>
                       </TableCell>
 
                       <TableCell className="text-right">

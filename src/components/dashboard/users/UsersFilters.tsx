@@ -33,12 +33,12 @@ export function UsersFilters({
               placeholder="Buscar por nombre o correo..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="h-10 pl-10"
+              className="h-10 pl-10 rounded-lg border-white/10 bg-transparent"
             />
           </div>
 
           <Select value={roleFilter} onValueChange={onRoleFilterChange}>
-            <SelectTrigger className="h-10 w-full md:w-40">
+            <SelectTrigger className="h-10 w-full md:w-40 rounded-lg border-white/10 bg-transparent">
               <SelectValue placeholder="Rol" />
             </SelectTrigger>
             <SelectContent>
@@ -50,7 +50,7 @@ export function UsersFilters({
           </Select>
 
           <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-            <SelectTrigger className="h-10 w-full md:w-40">
+            <SelectTrigger className="h-10 w-full md:w-40 rounded-lg border-white/10 bg-transparent">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>

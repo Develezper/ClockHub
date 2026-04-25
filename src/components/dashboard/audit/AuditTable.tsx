@@ -1,6 +1,7 @@
 "use client";
 
 import { ClipboardList } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,23 +68,38 @@ export function AuditTable({
                     <TableRow key={log.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className={`rounded-lg border p-2 ${actionStyle.iconBadgeClass}`}>
-                            <ActionIcon className="h-4 w-4" />
+                          <div className={cn(
+                            "flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-transparent",
+                            actionStyle.textClass
+                          )}>
+                            <ActionIcon className="h-4.5 w-4.5" />
                           </div>
                           <span className="font-medium">{AUDIT_ACTION_LABELS[log.action]}</span>
                         </div>
                       </TableCell>
 
                       <TableCell>
-                        <Badge className={AUDIT_ENTITY_BADGE_CLASS[log.entity]}>
-                          {AUDIT_ENTITY_LABELS[log.entity]}
-                        </Badge>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className={cn(
+                                "h-2.5 w-2.5 rounded-full",
+                                log.entity === 'AUTH' && "bg-cyan-500 shadow-[0_0_12px_rgba(6,182,212,0.6)]",
+                                log.entity === 'USER' && "bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.6)]",
+                                log.entity === 'SCHEDULE' && "bg-violet-500 shadow-[0_0_12px_rgba(139,92,246,0.6)]"
+                              )} 
+                            />
+                            <span className="text-sm font-medium text-foreground/90">
+                              {AUDIT_ENTITY_LABELS[log.entity]}
+                            </span>
+                          </div>
+                        </div>
                       </TableCell>
 
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">{logUser ? getInitials(logUser.name) : "?"}</AvatarFallback>
+                            <AvatarFallback className="bg-white/10 text-xs text-muted-foreground">{logUser ? getInitials(logUser.name) : "?"}</AvatarFallback>
                           </Avatar>
                           <span>{logUser?.name || "Desconocido"}</span>
                         </div>

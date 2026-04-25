@@ -33,12 +33,12 @@ export function AuditFilters({
               placeholder="Buscar en el registro..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="h-10 pl-10"
+              className="h-10 pl-10 rounded-lg border-white/10 bg-transparent"
             />
           </div>
 
           <Select value={actionFilter} onValueChange={onActionFilterChange}>
-            <SelectTrigger className="h-10 w-full md:w-44">
+            <SelectTrigger className="h-10 w-full md:w-44 rounded-lg border-white/10 bg-transparent">
               <SelectValue placeholder="Acción" />
             </SelectTrigger>
             <SelectContent>
@@ -54,7 +54,7 @@ export function AuditFilters({
           </Select>
 
           <Select value={entityFilter} onValueChange={onEntityFilterChange}>
-            <SelectTrigger className="h-10 w-full md:w-40">
+            <SelectTrigger className="h-10 w-full md:w-40 rounded-lg border-white/10 bg-transparent">
               <SelectValue placeholder="Entidad" />
             </SelectTrigger>
             <SelectContent>

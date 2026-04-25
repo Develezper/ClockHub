@@ -29,11 +29,11 @@ export function SchedulesFilters({
               placeholder="Buscar por título o usuario..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="h-10 pl-10"
+              className="h-10 pl-10 rounded-lg border-white/10 bg-transparent"
             />
           </div>
           <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-            <SelectTrigger className="h-10 w-full md:w-48">
+            <SelectTrigger className="h-10 w-full md:w-48 rounded-lg border-white/10 bg-transparent">
               <Filter className="mr-2 h-4 w-4" />
               <SelectValue placeholder="Filtrar por estado" />
             </SelectTrigger>
