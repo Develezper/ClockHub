@@ -7,6 +7,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id               Int        @id @default(autoincrement())
+  name             String
+  email            String     @unique
+  password         String
+  role             Role       @default(EMPLOYEE)
+  status           UserStatus @default(ACTIVE)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  teamId           String?
+  auditLogs        AuditLog[]
+  createdSchedules Schedule[] @relation("ScheduleCreator")
+  schedules        Schedule[]
+
+  @@index([teamId])
+}
+
+model Schedule {
+  id          Int            @id @default(autoincrement())
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime
+  status      ScheduleStatus @default(ACTIVE)
+  userId      Int
+  createdById Int
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  createdBy   User           @relation("ScheduleCreator", fields: [createdById], references: [id])
+  user        User           @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([startAt])
+}
+
+model AuditLog {
+  id        Int         @id @default(autoincrement())
+  action    AuditAction
+  entity    String
+  entityId  String?
+  message   String
+  meta      Json?
+  userId    Int?
+  createdAt DateTime    @default(now())
+  user      User?       @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
 enum Role {
   ADMIN
   MANAGER
@@ -31,56 +83,4 @@ enum AuditAction {
   UPDATE
   DELETE
   ROLE_CHANGE
-}
-
-model User {
-  id               Int         @id @default(autoincrement())
-  name             String
-  email            String      @unique
-  password         String
-  teamId           String?
-  role             Role        @default(EMPLOYEE)
-  status           UserStatus  @default(ACTIVE)
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-  schedules        Schedule[]
-  createdSchedules Schedule[]  @relation("ScheduleCreator")
-  auditLogs        AuditLog[]
-
-  @@index([teamId])
-}
-
-model Schedule {
-  id          Int            @id @default(autoincrement())
-  title       String
-  description String?
-  startAt     DateTime
-  endAt       DateTime
-  status      ScheduleStatus @default(ACTIVE)
-  userId      Int
-  createdById Int
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  user        User           @relation(fields: [userId], references: [id], onDelete: Restrict)
-  createdBy   User           @relation("ScheduleCreator", fields: [createdById], references: [id], onDelete: Restrict)
-
-  @@index([userId])
-  @@index([status])
-  @@index([startAt])
-}
-
-model AuditLog {
-  id        Int         @id @default(autoincrement())
-  action    AuditAction
-  entity    String
-  entityId  String?
-  message   String
-  meta      Json?
-  userId    Int?
-  createdAt DateTime    @default(now())
-  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
 }
