@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -29,6 +30,7 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { getInitials } from "@/lib/format";
 import { ROLE_LABELS } from "@/types";
+import { USER_ROLE_BADGE_CLASS, USER_ROLE_TEXT_CLASS } from "@/lib/semantic-colors";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -193,11 +195,16 @@ export default function SettingsPage() {
                   {/* Role Info */}
                   <div className="p-4 bg-muted rounded-lg">
                     <div className="flex items-center gap-4">
-                      <Shield className="h-5 w-5 text-muted-foreground" />
+                      <Shield className={`h-5 w-5 ${user ? USER_ROLE_TEXT_CLASS[user.role] : "text-muted-foreground"}`} />
                       <div>
-                        <p className="font-medium">
-                          Rol: {user ? ROLE_LABELS[user.role] : "Desconocido"}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className={`font-medium ${user ? USER_ROLE_TEXT_CLASS[user.role] : ""}`}>Rol:</p>
+                          {user ? (
+                            <Badge className={USER_ROLE_BADGE_CLASS[user.role]}>{ROLE_LABELS[user.role]}</Badge>
+                          ) : (
+                            <p className="font-medium">Desconocido</p>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">
                           Los cambios de rol deben ser solicitados a un administrador
                         </p>

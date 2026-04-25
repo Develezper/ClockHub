@@ -5,12 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ROLE_LABELS, USER_STATUS_LABELS, type User } from "@/types";
+import { USER_ROLE_BADGE_CLASS, USER_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type UserDetailsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: User | null;
-  badgeClassName: string;
   formatDate: (date: Date) => string;
   getInitials: (name: string) => string;
 };
@@ -19,7 +19,6 @@ export function UserDetailsDialog({
   open,
   onOpenChange,
   user,
-  badgeClassName,
   formatDate,
   getInitials,
 }: UserDetailsDialogProps) {
@@ -45,11 +44,11 @@ export function UserDetailsDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Rol</p>
-                <Badge className={badgeClassName}>{ROLE_LABELS[user.role]}</Badge>
+                <Badge className={USER_ROLE_BADGE_CLASS[user.role]}>{ROLE_LABELS[user.role]}</Badge>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Estado</p>
-                <Badge className={badgeClassName}>{USER_STATUS_LABELS[user.status]}</Badge>
+                <Badge className={USER_STATUS_BADGE_CLASS[user.status]}>{USER_STATUS_LABELS[user.status]}</Badge>
               </div>
             </div>
 

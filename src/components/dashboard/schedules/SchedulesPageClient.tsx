@@ -105,8 +105,6 @@ export default function SchedulesPage() {
     return d.toISOString().slice(0, 16);
   };
 
-  const badgeClassName = "bg-muted text-foreground";
-
   const resetForm = () => {
     setFormData({
       title: "",
@@ -237,7 +235,6 @@ export default function SchedulesPage() {
         <SchedulesTable
           schedules={filteredSchedules}
           usersById={usersById}
-          badgeClassName={badgeClassName}
           canCreate={canCreate}
           canEdit={canEdit}
           canDelete={canDelete}
@@ -281,7 +278,6 @@ export default function SchedulesPage() {
         onOpenChange={setIsViewOpen}
         schedule={selectedSchedule}
         assignedUser={selectedAssignedUser}
-        badgeClassName={badgeClassName}
         formatDateTime={formatDateTime}
         getInitials={getInitials}
       />

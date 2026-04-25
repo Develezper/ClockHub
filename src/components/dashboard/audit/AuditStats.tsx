@@ -15,12 +15,12 @@ export function AuditStats({ todayLogs, loginCount, changeCount }: AuditStatsPro
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <Calendar className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(148,163,184,0.4)] bg-[rgba(148,163,184,0.2)] p-2">
+              <Calendar className="h-5 w-5 text-slate-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{todayLogs}</p>
-              <p className="text-sm text-muted-foreground">Eventos Hoy</p>
+              <p className="text-2xl font-bold text-slate-200">{todayLogs}</p>
+              <p className="text-sm text-slate-300">Eventos Hoy</p>
             </div>
           </div>
         </CardContent>
@@ -29,12 +29,12 @@ export function AuditStats({ todayLogs, loginCount, changeCount }: AuditStatsPro
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <LogIn className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.2)] p-2">
+              <LogIn className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{loginCount}</p>
-              <p className="text-sm text-muted-foreground">Inicios de Sesión</p>
+              <p className="text-2xl font-bold text-emerald-200">{loginCount}</p>
+              <p className="text-sm text-emerald-300">Inicios de Sesión</p>
             </div>
           </div>
         </CardContent>
@@ -43,12 +43,12 @@ export function AuditStats({ todayLogs, loginCount, changeCount }: AuditStatsPro
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <Edit className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(125,211,252,0.4)] bg-[rgba(125,211,252,0.2)] p-2">
+              <Edit className="h-5 w-5 text-sky-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{changeCount}</p>
-              <p className="text-sm text-muted-foreground">Cambios Realizados</p>
+              <p className="text-2xl font-bold text-sky-200">{changeCount}</p>
+              <p className="text-sm text-sky-300">Cambios Realizados</p>
             </div>
           </div>
         </CardContent>

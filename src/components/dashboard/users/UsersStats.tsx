@@ -16,12 +16,12 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <Users className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(148,163,184,0.4)] bg-[rgba(148,163,184,0.2)] p-2">
+              <Users className="h-5 w-5 text-slate-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{totalUsers}</p>
-              <p className="text-sm text-muted-foreground">Total Usuarios</p>
+              <p className="text-2xl font-bold text-slate-200">{totalUsers}</p>
+              <p className="text-sm text-slate-300">Total Usuarios</p>
             </div>
           </div>
         </CardContent>
@@ -30,12 +30,12 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <UserCheck className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(52,211,153,0.4)] bg-[rgba(52,211,153,0.2)] p-2">
+              <UserCheck className="h-5 w-5 text-emerald-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{activeUsers}</p>
-              <p className="text-sm text-muted-foreground">Activos</p>
+              <p className="text-2xl font-bold text-emerald-200">{activeUsers}</p>
+              <p className="text-sm text-emerald-300">Activos</p>
             </div>
           </div>
         </CardContent>
@@ -44,12 +44,12 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <Shield className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(251,113,133,0.4)] bg-[rgba(251,113,133,0.2)] p-2">
+              <Shield className="h-5 w-5 text-rose-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{adminCount}</p>
-              <p className="text-sm text-muted-foreground">Administradores</p>
+              <p className="text-2xl font-bold text-rose-200">{adminCount}</p>
+              <p className="text-sm text-rose-300">Administradores</p>
             </div>
           </div>
         </CardContent>
@@ -58,12 +58,12 @@ export function UsersStats({ totalUsers, activeUsers, adminCount, managerCount }
       <Card className="surface">
         <CardContent className="surface-body">
           <div className="flex items-center gap-4">
-            <div className="rounded-lg bg-muted p-2">
-              <Users className="h-5 w-5 text-foreground" />
+            <div className="rounded-lg border border-[rgba(251,191,36,0.4)] bg-[rgba(251,191,36,0.2)] p-2">
+              <Users className="h-5 w-5 text-amber-300" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{managerCount}</p>
-              <p className="text-sm text-muted-foreground">Gerentes</p>
+              <p className="text-2xl font-bold text-amber-200">{managerCount}</p>
+              <p className="text-sm text-amber-300">Gerentes</p>
             </div>
           </div>
         </CardContent>

@@ -1,5 +1,7 @@
 "use client";
 
+import { CalendarDays } from "lucide-react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -7,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { SCHEDULE_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 import type { ScheduleFormData, ScheduleStatus, User } from "@/types";
 
 type ScheduleFormDialogProps = {
@@ -20,6 +23,54 @@ type ScheduleFormDialogProps = {
   onChange: (data: ScheduleFormData) => void;
   onSubmit: () => Promise<void>;
 };
+
+type DateTimeFieldProps = {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+};
+
+function DateTimeField({ id, label, value, onChange }: DateTimeFieldProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openPicker = () => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+
+    input.focus();
+    input.click();
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Input
+          ref={inputRef}
+          id={id}
+          type="datetime-local"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="pr-10 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:invert"
+        />
+        <button
+          type="button"
+          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+          onClick={openPicker}
+          aria-label={`Seleccionar fecha para ${label.toLowerCase()}`}
+        >
+          <CalendarDays className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function ScheduleFormDialog({
   open,
@@ -70,24 +121,18 @@ export function ScheduleFormDialog({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor={isEditMode ? "edit-startTime" : "startTime"}>Inicio *</Label>
-              <Input
-                id={isEditMode ? "edit-startTime" : "startTime"}
-                type="datetime-local"
-                value={formData.startTime}
-                onChange={(e) => onChange({ ...formData, startTime: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={isEditMode ? "edit-endTime" : "endTime"}>Fin *</Label>
-              <Input
-                id={isEditMode ? "edit-endTime" : "endTime"}
-                type="datetime-local"
-                value={formData.endTime}
-                onChange={(e) => onChange({ ...formData, endTime: e.target.value })}
-              />
-            </div>
+            <DateTimeField
+              id={isEditMode ? "edit-startTime" : "startTime"}
+              label="Inicio *"
+              value={formData.startTime}
+              onChange={(value) => onChange({ ...formData, startTime: value })}
+            />
+            <DateTimeField
+              id={isEditMode ? "edit-endTime" : "endTime"}
+              label="Fin *"
+              value={formData.endTime}
+              onChange={(value) => onChange({ ...formData, endTime: value })}
+            />
           </div>
 
           <div className="space-y-2">
@@ -116,7 +161,7 @@ export function ScheduleFormDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SCHEDULED">Programado</SelectItem>
+                <SelectItem value="SCHEDULED" className={SCHEDULE_STATUS_BADGE_CLASS.SCHEDULED}>Programado</SelectItem>
               </SelectContent>
             </Select>
           </div>

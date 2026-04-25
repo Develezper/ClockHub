@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { USER_ROLE_BADGE_CLASS, USER_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 import type { UserFormData, UserRole, UserStatus } from "@/types";
 
 type UserFormDialogProps = {
@@ -87,9 +88,9 @@ export function UserFormDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="EMPLOYEE">Empleado</SelectItem>
-                  <SelectItem value="MANAGER">Gerente</SelectItem>
-                  <SelectItem value="ADMIN">Administrador</SelectItem>
+                  <SelectItem value="EMPLOYEE" className={USER_ROLE_BADGE_CLASS.EMPLOYEE}>Empleado</SelectItem>
+                  <SelectItem value="MANAGER" className={USER_ROLE_BADGE_CLASS.MANAGER}>Gerente</SelectItem>
+                  <SelectItem value="ADMIN" className={USER_ROLE_BADGE_CLASS.ADMIN}>Administrador</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -104,9 +105,9 @@ export function UserFormDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ACTIVE">Activo</SelectItem>
-                  <SelectItem value="INACTIVE">Inactivo</SelectItem>
-                  <SelectItem value="SUSPENDED">Suspendido</SelectItem>
+                  <SelectItem value="ACTIVE" className={USER_STATUS_BADGE_CLASS.ACTIVE}>Activo</SelectItem>
+                  <SelectItem value="INACTIVE" className={USER_STATUS_BADGE_CLASS.INACTIVE}>Inactivo</SelectItem>
+                  <SelectItem value="SUSPENDED" className={USER_STATUS_BADGE_CLASS.SUSPENDED}>Suspendido</SelectItem>
                 </SelectContent>
               </Select>
             </div>

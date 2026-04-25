@@ -115,9 +115,6 @@ export default function AuditPage() {
     }
   };
 
-  const actionBadgeClass = "bg-muted text-foreground";
-  const entityBadgeClass = "bg-muted text-foreground border-border";
-
   const handleViewDetail = (log: AuditLog) => {
     setSelectedLog(log);
     setIsDetailOpen(true);
@@ -179,8 +176,6 @@ export default function AuditPage() {
         <AuditTable
           logs={filteredLogs}
           usersById={usersById}
-          actionBadgeClass={actionBadgeClass}
-          entityBadgeClass={entityBadgeClass}
           searchTerm={searchTerm}
           actionFilter={actionFilter}
           entityFilter={entityFilter}
@@ -197,8 +192,6 @@ export default function AuditPage() {
         onOpenChange={setIsDetailOpen}
         selectedLog={selectedLog}
         selectedLogUser={selectedLogUser}
-        actionBadgeClass={actionBadgeClass}
-        entityBadgeClass={entityBadgeClass}
         formatDateTime={formatDateTime}
         getInitials={getInitials}
         getActionIcon={getActionIcon}

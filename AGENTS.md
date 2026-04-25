@@ -12,7 +12,7 @@ Usted es un experto senior. Su misión es construir ClockHub optimizando el stac
 2. **Security & Auth (JWT Secure):**
    - Use `jose` para JWT (compatible con Edge).
    - Implemente **HttpOnly, Secure y SameSite=Lax Cookies** para Access y Refresh Tokens.
-   - Redirección automática en Middleware si el token expira.
+   - Redirección automática en Proxy si el token expira.
 
 3. **Strict RBAC & Audit:**
    - Roles: `ADMIN`, `MANAGER`, `EMPLOYEE`.
@@ -32,4 +32,4 @@ Usted es un experto senior. Su misión es construir ClockHub optimizando el stac
    - Use componentes reutilizables con props tipadas (Button, Badge, Card, Modal).
 
 7. **Structure:**
-   - Respete: `src/app`, `src/components/ui`, `src/context`, `src/hooks`, `src/services`, `src/types`, `src/lib`, `src/middleware.ts`.
+   - Respete: `src/app`, `src/components/ui`, `src/context`, `src/hooks`, `src/services`, `src/types`, `src/lib`, `src/proxy.ts`.

@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Modal } from "@/components/ui/modal";
 import { AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS, type AuditLog } from "@/types";
+import { AUDIT_ACTION_STYLE, AUDIT_ENTITY_BADGE_CLASS } from "@/lib/semantic-colors";
 import type { LucideIcon } from "lucide-react";
 import type { User } from "@/types";
 
@@ -15,8 +16,6 @@ type AuditDetailModalProps = {
   onOpenChange: (open: boolean) => void;
   selectedLog: AuditLog | null;
   selectedLogUser?: User;
-  actionBadgeClass: string;
-  entityBadgeClass: string;
   formatDateTime: (date: Date) => string;
   getInitials: (name: string) => string;
   getActionIcon: (action: AuditLog["action"]) => LucideIcon;
@@ -27,12 +26,12 @@ export function AuditDetailModal({
   onOpenChange,
   selectedLog,
   selectedLogUser,
-  actionBadgeClass,
-  entityBadgeClass,
   formatDateTime,
   getInitials,
   getActionIcon,
 }: AuditDetailModalProps) {
+  const actionStyle = selectedLog ? AUDIT_ACTION_STYLE[selectedLog.action] : null;
+
   return (
     <Modal
       open={open}
@@ -49,7 +48,7 @@ export function AuditDetailModal({
       {selectedLog && (
         <div className="space-y-4 py-4">
           <div className="flex items-center gap-4">
-            <div className={`rounded-xl p-3 ${actionBadgeClass}`}>
+            <div className={`rounded-xl border p-3 ${actionStyle?.iconBadgeClass ?? ""}`}>
               {(() => {
                 const ActionIcon = getActionIcon(selectedLog.action);
                 return <ActionIcon className="h-6 w-6" />;
@@ -57,7 +56,7 @@ export function AuditDetailModal({
             </div>
             <div>
               <h3 className="text-lg font-semibold">{AUDIT_ACTION_LABELS[selectedLog.action]}</h3>
-              <Badge variant="outline" className={entityBadgeClass}>
+              <Badge className={AUDIT_ENTITY_BADGE_CLASS[selectedLog.entity]}>
                 {AUDIT_ENTITY_LABELS[selectedLog.entity]}
               </Badge>
             </div>

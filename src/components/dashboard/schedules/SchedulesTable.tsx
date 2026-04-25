@@ -15,11 +15,11 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/dashboard/common/EmptyState";
 import { STATUS_LABELS, type Schedule, type User } from "@/types";
+import { SCHEDULE_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type SchedulesTableProps = {
   schedules: Schedule[];
   usersById: Map<string, User>;
-  badgeClassName: string;
   canCreate: boolean;
   canEdit: boolean;
   canDelete: boolean;
@@ -36,7 +36,6 @@ type SchedulesTableProps = {
 export function SchedulesTable({
   schedules,
   usersById,
-  badgeClassName,
   canCreate,
   canEdit,
   canDelete,
@@ -115,7 +114,9 @@ export function SchedulesTable({
                       </TableCell>
 
                       <TableCell>
-                        <Badge className={badgeClassName}>{STATUS_LABELS[schedule.status]}</Badge>
+                        <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
+                          {STATUS_LABELS[schedule.status]}
+                        </Badge>
                       </TableCell>
 
                       <TableCell className="text-right">

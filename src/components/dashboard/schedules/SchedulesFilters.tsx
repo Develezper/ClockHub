@@ -4,6 +4,7 @@ import { Filter, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SCHEDULE_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type SchedulesFiltersProps = {
   searchTerm: string;
@@ -38,8 +39,8 @@ export function SchedulesFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="SCHEDULED">Programado</SelectItem>
-              <SelectItem value="CANCELLED">Cancelado</SelectItem>
+              <SelectItem value="SCHEDULED" className={SCHEDULE_STATUS_BADGE_CLASS.SCHEDULED}>Programado</SelectItem>
+              <SelectItem value="CANCELLED" className={SCHEDULE_STATUS_BADGE_CLASS.CANCELLED}>Cancelado</SelectItem>
             </SelectContent>
           </Select>
         </div>

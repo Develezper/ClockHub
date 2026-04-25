@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AUDIT_ACTION_STYLE, AUDIT_ENTITY_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type AuditFiltersProps = {
   searchTerm: string;
@@ -42,13 +43,13 @@ export function AuditFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las acciones</SelectItem>
-              <SelectItem value="CREATE">Creación</SelectItem>
-              <SelectItem value="UPDATE">Actualización</SelectItem>
-              <SelectItem value="DELETE">Eliminación</SelectItem>
-              <SelectItem value="LOGIN">Inicio Sesión</SelectItem>
-              <SelectItem value="LOGOUT">Cierre Sesión</SelectItem>
-              <SelectItem value="ROLE_CHANGE">Cambio de Rol</SelectItem>
-              <SelectItem value="STATUS_CHANGE">Cambio de Estado</SelectItem>
+              <SelectItem value="CREATE" className={AUDIT_ACTION_STYLE.CREATE.textClass}>Creación</SelectItem>
+              <SelectItem value="UPDATE" className={AUDIT_ACTION_STYLE.UPDATE.textClass}>Actualización</SelectItem>
+              <SelectItem value="DELETE" className={AUDIT_ACTION_STYLE.DELETE.textClass}>Eliminación</SelectItem>
+              <SelectItem value="LOGIN" className={AUDIT_ACTION_STYLE.LOGIN.textClass}>Inicio Sesión</SelectItem>
+              <SelectItem value="LOGOUT" className={AUDIT_ACTION_STYLE.LOGOUT.textClass}>Cierre Sesión</SelectItem>
+              <SelectItem value="ROLE_CHANGE" className={AUDIT_ACTION_STYLE.ROLE_CHANGE.textClass}>Cambio de Rol</SelectItem>
+              <SelectItem value="STATUS_CHANGE" className={AUDIT_ACTION_STYLE.STATUS_CHANGE.textClass}>Cambio de Estado</SelectItem>
             </SelectContent>
           </Select>
 
@@ -58,9 +59,9 @@ export function AuditFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas</SelectItem>
-              <SelectItem value="USER">Usuario</SelectItem>
-              <SelectItem value="SCHEDULE">Horario</SelectItem>
-              <SelectItem value="AUTH">Autenticación</SelectItem>
+              <SelectItem value="USER" className={AUDIT_ENTITY_BADGE_CLASS.USER}>Usuario</SelectItem>
+              <SelectItem value="SCHEDULE" className={AUDIT_ENTITY_BADGE_CLASS.SCHEDULE}>Horario</SelectItem>
+              <SelectItem value="AUTH" className={AUDIT_ENTITY_BADGE_CLASS.AUTH}>Autenticación</SelectItem>
             </SelectContent>
           </Select>
         </div>

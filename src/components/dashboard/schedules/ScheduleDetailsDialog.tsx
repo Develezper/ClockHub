@@ -6,13 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { STATUS_LABELS, type Schedule, type User } from "@/types";
+import { SCHEDULE_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type ScheduleDetailsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   schedule: Schedule | null;
   assignedUser?: User;
-  badgeClassName: string;
   formatDateTime: (date: Date) => string;
   getInitials: (name: string) => string;
 };
@@ -22,7 +22,6 @@ export function ScheduleDetailsDialog({
   onOpenChange,
   schedule,
   assignedUser,
-  badgeClassName,
   formatDateTime,
   getInitials,
 }: ScheduleDetailsDialogProps) {
@@ -41,7 +40,9 @@ export function ScheduleDetailsDialog({
               </div>
               <div>
                 <h3 className="text-lg font-semibold">{schedule.title}</h3>
-                <Badge className={badgeClassName}>{STATUS_LABELS[schedule.status]}</Badge>
+                <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
+                  {STATUS_LABELS[schedule.status]}
+                </Badge>
               </div>
             </div>
 

@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useSchedule } from "@/context/ScheduleContext";
 import { useUsers } from "@/context/UserContext";
 import { formatDateTimeEs } from "@/lib/format";
 import { STATUS_LABELS } from "@/types";
+import { SCHEDULE_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 export default function DashboardPage() {
   const { user, hasPermission } = useAuth();
@@ -52,20 +54,20 @@ export default function DashboardPage() {
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-md border border-border bg-card/40 p-4">
-            <p className="text-sm text-muted-foreground">Horarios activos</p>
-            <p className="mt-1 text-2xl font-semibold">{activeSchedules.length}</p>
+            <p className="text-sm text-emerald-300">Horarios activos</p>
+            <p className="mt-1 text-2xl font-semibold text-emerald-200">{activeSchedules.length}</p>
           </div>
           <div className="rounded-md border border-border bg-card/40 p-4">
-            <p className="text-sm text-muted-foreground">Cancelados</p>
-            <p className="mt-1 text-2xl font-semibold">{cancelledSchedules.length}</p>
+            <p className="text-sm text-rose-300">Cancelados</p>
+            <p className="mt-1 text-2xl font-semibold text-rose-200">{cancelledSchedules.length}</p>
           </div>
           <div className="rounded-md border border-border bg-card/40 p-4">
-            <p className="text-sm text-muted-foreground">Pendientes</p>
-            <p className="mt-1 text-2xl font-semibold">{pendingSchedules.length}</p>
+            <p className="text-sm text-emerald-300">Pendientes</p>
+            <p className="mt-1 text-2xl font-semibold text-emerald-200">{pendingSchedules.length}</p>
           </div>
           <div className="rounded-md border border-border bg-card/40 p-4">
-            <p className="text-sm text-muted-foreground">Usuarios activos</p>
-            <p className="mt-1 text-2xl font-semibold">{activeUsers.length}</p>
+            <p className="text-sm text-emerald-300">Usuarios activos</p>
+            <p className="mt-1 text-2xl font-semibold text-emerald-200">{activeUsers.length}</p>
           </div>
         </section>
 
@@ -83,9 +85,13 @@ export default function DashboardPage() {
               <ul className="space-y-2 text-sm">
                 {upcomingSchedules.map((schedule) => (
                   <li key={schedule.id} className="rounded-md border border-border/80 bg-background/40 p-3">
-                    <p className="font-medium">{schedule.title}</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-medium">{schedule.title}</p>
+                      <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
+                        {STATUS_LABELS[schedule.status]}
+                      </Badge>
+                    </div>
                     <p className="text-muted-foreground">{formatDateTime(schedule.startTime)} - {formatDateTime(schedule.endTime)}</p>
-                    <p className="text-xs text-muted-foreground">{STATUS_LABELS[schedule.status]}</p>
                   </li>
                 ))}
               </ul>
@@ -110,7 +116,12 @@ export default function DashboardPage() {
 
                   return (
                     <li key={schedule.id} className="rounded-md border border-border/80 bg-background/40 p-3">
-                      <p className="font-medium">{schedule.title}</p>
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="font-medium">{schedule.title}</p>
+                        <Badge className={SCHEDULE_STATUS_BADGE_CLASS[schedule.status]}>
+                          {STATUS_LABELS[schedule.status]}
+                        </Badge>
+                      </div>
                       <p className="text-muted-foreground">{assignedUser?.name ?? "Usuario desconocido"}</p>
                       <p className="text-xs text-muted-foreground">{formatDateTime(schedule.updatedAt)}</p>
                     </li>

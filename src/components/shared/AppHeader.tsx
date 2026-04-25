@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { ROLE_LABELS } from "@/types";
+import { USER_ROLE_BADGE_CLASS } from "@/lib/semantic-colors";
 
 interface AppHeaderProps {
   title?: string;
@@ -21,9 +23,10 @@ export function AppHeader({ title }: AppHeaderProps) {
       <h1 className="text-base font-semibold tracking-tight">{title ?? "Dashboard"}</h1>
       <div className="flex items-center gap-3 text-sm">
         {user && (
-          <span className="hidden text-muted-foreground md:inline">
-            {user.name} ({ROLE_LABELS[user.role]})
-          </span>
+          <div className="hidden items-center gap-2 md:flex">
+            <span className="text-muted-foreground">{user.name}</span>
+            <Badge className={USER_ROLE_BADGE_CLASS[user.role]}>{ROLE_LABELS[user.role]}</Badge>
+          </div>
         )}
         <Button variant="outline" size="sm" className="h-9 px-4" onClick={handleLogout}>
           Cerrar sesión

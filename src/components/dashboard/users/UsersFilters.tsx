@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { USER_ROLE_BADGE_CLASS, USER_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type UsersFiltersProps = {
   searchTerm: string;
@@ -42,9 +43,9 @@ export function UsersFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los roles</SelectItem>
-              <SelectItem value="ADMIN">Administrador</SelectItem>
-              <SelectItem value="MANAGER">Gerente</SelectItem>
-              <SelectItem value="EMPLOYEE">Empleado</SelectItem>
+              <SelectItem value="ADMIN" className={USER_ROLE_BADGE_CLASS.ADMIN}>Administrador</SelectItem>
+              <SelectItem value="MANAGER" className={USER_ROLE_BADGE_CLASS.MANAGER}>Gerente</SelectItem>
+              <SelectItem value="EMPLOYEE" className={USER_ROLE_BADGE_CLASS.EMPLOYEE}>Empleado</SelectItem>
             </SelectContent>
           </Select>
 
@@ -54,9 +55,9 @@ export function UsersFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="ACTIVE">Activo</SelectItem>
-              <SelectItem value="INACTIVE">Inactivo</SelectItem>
-              <SelectItem value="SUSPENDED">Suspendido</SelectItem>
+              <SelectItem value="ACTIVE" className={USER_STATUS_BADGE_CLASS.ACTIVE}>Activo</SelectItem>
+              <SelectItem value="INACTIVE" className={USER_STATUS_BADGE_CLASS.INACTIVE}>Inactivo</SelectItem>
+              <SelectItem value="SUSPENDED" className={USER_STATUS_BADGE_CLASS.SUSPENDED}>Suspendido</SelectItem>
             </SelectContent>
           </Select>
         </div>

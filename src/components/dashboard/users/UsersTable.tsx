@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EmptyState } from "@/components/dashboard/common/EmptyState";
 import { ROLE_LABELS, USER_STATUS_LABELS, type User, type UserStatus } from "@/types";
+import { USER_ROLE_BADGE_CLASS, USER_STATUS_BADGE_CLASS } from "@/lib/semantic-colors";
 
 type UsersTableProps = {
   users: User[];
   currentUserId?: string;
-  badgeClassName: string;
   searchTerm: string;
   roleFilter: string;
   statusFilter: string;
@@ -34,7 +34,6 @@ type UsersTableProps = {
 export function UsersTable({
   users,
   currentUserId,
-  badgeClassName,
   searchTerm,
   roleFilter,
   statusFilter,
@@ -88,10 +87,10 @@ export function UsersTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={badgeClassName}>{ROLE_LABELS[u.role]}</Badge>
+                      <Badge className={USER_ROLE_BADGE_CLASS[u.role]}>{ROLE_LABELS[u.role]}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={badgeClassName}>{USER_STATUS_LABELS[u.status]}</Badge>
+                      <Badge className={USER_STATUS_BADGE_CLASS[u.status]}>{USER_STATUS_LABELS[u.status]}</Badge>
                     </TableCell>
                     <TableCell>{formatDate(u.createdAt)}</TableCell>
                     <TableCell className="text-right">

@@ -8,13 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { EmptyState } from "@/components/dashboard/common/EmptyState";
 import { AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS, type AuditAction, type AuditLog, type User } from "@/types";
+import { AUDIT_ACTION_STYLE, AUDIT_ENTITY_BADGE_CLASS } from "@/lib/semantic-colors";
 import type { LucideIcon } from "lucide-react";
 
 type AuditTableProps = {
   logs: AuditLog[];
   usersById: Map<string, User>;
-  actionBadgeClass: string;
-  entityBadgeClass: string;
   searchTerm: string;
   actionFilter: string;
   entityFilter: string;
@@ -28,8 +27,6 @@ type AuditTableProps = {
 export function AuditTable({
   logs,
   usersById,
-  actionBadgeClass,
-  entityBadgeClass,
   searchTerm,
   actionFilter,
   entityFilter,
@@ -64,12 +61,13 @@ export function AuditTable({
                 {logs.map((log) => {
                   const logUser = usersById.get(log.userId);
                   const ActionIcon = getActionIcon(log.action);
+                  const actionStyle = AUDIT_ACTION_STYLE[log.action];
 
                   return (
                     <TableRow key={log.id}>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className={`rounded-lg p-2 ${actionBadgeClass}`}>
+                          <div className={`rounded-lg border p-2 ${actionStyle.iconBadgeClass}`}>
                             <ActionIcon className="h-4 w-4" />
                           </div>
                           <span className="font-medium">{AUDIT_ACTION_LABELS[log.action]}</span>
@@ -77,7 +75,7 @@ export function AuditTable({
                       </TableCell>
 
                       <TableCell>
-                        <Badge variant="outline" className={entityBadgeClass}>
+                        <Badge className={AUDIT_ENTITY_BADGE_CLASS[log.entity]}>
                           {AUDIT_ENTITY_LABELS[log.entity]}
                         </Badge>
                       </TableCell>

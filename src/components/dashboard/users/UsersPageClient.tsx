@@ -85,8 +85,6 @@ export default function UsersPage() {
     });
   }, [users, searchTerm, roleFilter, statusFilter]);
 
-  const badgeClassName = "bg-muted text-foreground";
-
   const resetForm = () => {
     setFormData({
       name: "",
@@ -234,7 +232,6 @@ export default function UsersPage() {
         <UsersTable
           users={filteredUsers}
           currentUserId={currentUser?.id}
-          badgeClassName={badgeClassName}
           searchTerm={searchTerm}
           roleFilter={roleFilter}
           statusFilter={statusFilter}
@@ -273,7 +270,6 @@ export default function UsersPage() {
         open={isViewOpen}
         onOpenChange={setIsViewOpen}
         user={selectedUser}
-        badgeClassName={badgeClassName}
         formatDate={formatDateEs}
         getInitials={getInitials}
       />
