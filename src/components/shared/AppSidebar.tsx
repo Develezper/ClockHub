@@ -27,7 +27,7 @@ export function AppSidebar() {
   };
 
   return (
-    <aside className="w-60 border-r border-border/80 bg-card/40 p-4">
+    <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-white/10 bg-black/40 backdrop-blur-md md:flex p-4">
       <div className="mb-5">
         <Link href="/dashboard" className="text-lg font-semibold tracking-tight">
           ClockHub
@@ -55,9 +55,9 @@ export function AppSidebar() {
         })}
       </nav>
 
-      <div className="mt-6 border-t border-border/80 pt-4">
-        <Button variant="outline" size="sm" className="h-9 w-full" onClick={handleLogout}>
-          Cerrar sesión
+      <div className="mt-auto border-t border-white/10 pt-4 px-2">
+        <Button variant="ghost" size="sm" className="w-full justify-start gap-2" onClick={handleLogout}>
+          <span className="opacity-70 group-hover:opacity-100 transition-opacity">Cerrar sesión</span>
         </Button>
       </div>
     </aside>

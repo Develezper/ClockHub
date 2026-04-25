@@ -45,32 +45,32 @@ export default function DashboardPage() {
 
       <div className="flex-1 overflow-auto p-5 md:p-6">
         <div className="mx-auto w-full max-w-6xl space-y-6">
-        <section className="rounded-md border border-border bg-card/50 p-5">
+        <section className="surface p-5">
           <h2 className="text-2xl font-semibold tracking-tight">Resumen</h2>
           <p className="mt-1 text-sm text-muted-foreground">Hola, {user?.name}</p>
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-md border border-border bg-card/40 p-4">
+          <div className="surface p-4">
             <p className="text-sm text-emerald-300">Horarios activos</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-200">{activeSchedules.length}</p>
           </div>
-          <div className="rounded-md border border-border bg-card/40 p-4">
+          <div className="surface p-4">
             <p className="text-sm text-rose-300">Cancelados</p>
             <p className="mt-1 text-2xl font-semibold text-rose-200">{cancelledSchedules.length}</p>
           </div>
-          <div className="rounded-md border border-border bg-card/40 p-4">
+          <div className="surface p-4">
             <p className="text-sm text-emerald-300">Pendientes</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-200">{pendingSchedules.length}</p>
           </div>
-          <div className="rounded-md border border-border bg-card/40 p-4">
+          <div className="surface p-4">
             <p className="text-sm text-emerald-300">Usuarios activos</p>
             <p className="mt-1 text-2xl font-semibold text-emerald-200">{activeUsers.length}</p>
           </div>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-md border border-border bg-card/40 p-5">
+          <div className="surface p-5">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-medium tracking-tight">Mis próximos horarios</h3>
               <Link href="/dashboard/horarios">
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="rounded-md border border-border bg-card/40 p-5">
+          <div className="surface p-5">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-medium tracking-tight">Actividad reciente</h3>
               {hasPermission("canViewAudit") && (

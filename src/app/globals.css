@@ -146,11 +146,19 @@
   }
 
   .surface {
-    @apply rounded-lg border border-border/80 bg-card/55;
+    @apply rounded-lg border border-white/10 bg-card/55 backdrop-blur-sm transition-all;
+  }
+
+  .surface:hover {
+    @apply border-white/15;
   }
 
   .surface-body {
     @apply p-5 md:p-6;
+  }
+
+  .glass {
+    @apply bg-white/[0.03] border border-white/10 backdrop-blur-md;
   }
 
   .auth-shell {

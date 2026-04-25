@@ -44,7 +44,7 @@ export default function DashboardLayout({
         <AuditProvider>
           <div className="flex h-screen bg-background">
             <AppSidebar />
-            <main className="flex-1 overflow-auto">
+            <main className="flex-1 overflow-auto md:pl-60">
               {children}
             </main>
           </div>
