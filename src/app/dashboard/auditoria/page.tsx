@@ -217,12 +217,12 @@ export default function AuditPage() {
     <div className="flex h-full flex-col">
       <AppHeader title="Registro de Auditoría" />
 
-      <div className="mx-auto w-full max-w-6xl flex-1 overflow-auto space-y-6 p-5 md:p-6">
+      <div className="page-shell page-stack">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Auditoría</h2>
-            <p className="text-muted-foreground">
+            <h2 className="page-heading">Auditoría</h2>
+            <p className="page-subheading">
               Registro de todas las acciones del sistema
             </p>
           </div>
@@ -234,8 +234,8 @@ export default function AuditPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="border-border bg-card/50">
-            <CardContent className="p-5">
+          <Card className="surface">
+            <CardContent className="surface-body">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-muted">
                   <Calendar className="h-5 w-5 text-foreground" />
@@ -247,8 +247,8 @@ export default function AuditPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-border bg-card/50">
-            <CardContent className="p-5">
+          <Card className="surface">
+            <CardContent className="surface-body">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-muted">
                   <LogIn className="h-5 w-5 text-foreground" />
@@ -260,8 +260,8 @@ export default function AuditPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-border bg-card/50">
-            <CardContent className="p-5">
+          <Card className="surface">
+            <CardContent className="surface-body">
               <div className="flex items-center gap-4">
                 <div className="p-2 rounded-lg bg-muted">
                   <Edit className="h-5 w-5 text-foreground" />
@@ -276,8 +276,8 @@ export default function AuditPage() {
         </div>
 
         {/* Filters */}
-        <Card className="border-border bg-card/50">
-          <CardContent className="p-5">
+        <Card className="surface">
+          <CardContent className="surface-body">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -319,7 +319,7 @@ export default function AuditPage() {
         </Card>
 
         {/* Audit Logs Table */}
-        <Card className="border-border bg-card/50">
+        <Card className="surface">
           <CardHeader>
             <CardTitle>Historial de Eventos</CardTitle>
             <CardDescription>

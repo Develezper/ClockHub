@@ -275,12 +275,12 @@ export default function SchedulesPage() {
     <div className="flex h-full flex-col">
       <AppHeader title="Gestión de Horarios" />
 
-      <div className="mx-auto w-full max-w-6xl flex-1 overflow-auto space-y-6 p-5 md:p-6">
+      <div className="page-shell page-stack">
         {/* Header Actions */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Horarios</h2>
-            <p className="text-muted-foreground">
+            <h2 className="page-heading">Horarios</h2>
+            <p className="page-subheading">
               {canViewAll ? "Gestiona todos los horarios del equipo" : "Visualiza tus horarios asignados"}
             </p>
           </div>
@@ -293,8 +293,8 @@ export default function SchedulesPage() {
         </div>
 
         {/* Filters */}
-        <Card className="border-border bg-card/50">
-          <CardContent className="p-5">
+        <Card className="surface">
+          <CardContent className="surface-body">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -323,7 +323,7 @@ export default function SchedulesPage() {
         </Card>
 
         {/* Schedules Table */}
-        <Card className="border-border bg-card/50">
+        <Card className="surface">
           <CardHeader>
             <CardTitle>Lista de Horarios</CardTitle>
             <CardDescription>
@@ -717,11 +717,11 @@ export default function SchedulesPage() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="space-y-1">
-                  <p className="text-muted-foreground">Creado</p>
+                  <p className="text-sm text-muted-foreground">Creado</p>
                   <p>{formatDateTime(selectedSchedule.createdAt)}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-muted-foreground">Actualizado</p>
+                  <p className="text-sm text-muted-foreground">Actualizado</p>
                   <p>{formatDateTime(selectedSchedule.updatedAt)}</p>
                 </div>
               </div>

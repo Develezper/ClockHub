@@ -85,12 +85,12 @@ export default function SettingsPage() {
     <div className="flex h-full flex-col">
       <AppHeader title="Configuración" />
 
-      <div className="mx-auto w-full max-w-5xl flex-1 overflow-auto p-5 md:p-6">
+      <div className="page-shell">
         <div className="mx-auto max-w-5xl space-y-6">
           {/* Header */}
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Configuración</h2>
-            <p className="text-muted-foreground">
+            <h2 className="page-heading">Configuración</h2>
+            <p className="page-subheading">
               Administra tu cuenta y preferencias
             </p>
           </div>
@@ -125,7 +125,7 @@ export default function SettingsPage() {
 
             {/* Profile Tab */}
             <TabsContent value="profile">
-              <Card className="border-border bg-card/50">
+              <Card className="surface">
                 <CardHeader>
                   <CardTitle>Información del Perfil</CardTitle>
                   <CardDescription>
@@ -220,7 +220,7 @@ export default function SettingsPage() {
 
             {/* Notifications Tab */}
             <TabsContent value="notifications">
-              <Card className="border-border bg-card/50">
+              <Card className="surface">
                 <CardHeader>
                   <CardTitle>Notificaciones</CardTitle>
                   <CardDescription>
@@ -318,7 +318,7 @@ export default function SettingsPage() {
 
             {/* Preferences Tab */}
             <TabsContent value="preferences">
-              <Card className="border-border bg-card/50">
+              <Card className="surface">
                 <CardHeader>
                   <CardTitle>Preferencias</CardTitle>
                   <CardDescription>
@@ -418,7 +418,7 @@ export default function SettingsPage() {
 
             {/* Security Tab */}
             <TabsContent value="security">
-              <Card className="border-border bg-card/50">
+              <Card className="surface">
                 <CardHeader>
                   <CardTitle>Seguridad</CardTitle>
                   <CardDescription>

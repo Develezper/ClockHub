@@ -19,7 +19,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 md:px-6">
           <span className="text-xl font-semibold tracking-tight">ClockHub</span>
           <div className="flex items-center gap-2">
             <Link href="/login">
@@ -36,32 +36,44 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-16 md:py-20">
-        <div className="max-w-3xl">
+      <main className="mx-auto w-full max-w-6xl px-4 py-14 md:px-6 md:py-20">
+        <section className="mx-auto max-w-3xl text-center">
           <h1 className="mb-4 text-4xl font-semibold tracking-tight md:text-5xl">Gestión de horarios</h1>
-          <p className="mb-8 text-lg text-muted-foreground">
+          <p className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground">
             Plataforma básica para administrar horarios, usuarios y auditoría.
           </p>
-        </div>
 
-        <div className="mb-10 flex flex-wrap gap-3">
-          <Link href="/registro">
-            <Button className="h-10 px-5">Crear cuenta</Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="outline" className="h-10 px-5">
-              Entrar al sistema
-            </Button>
-          </Link>
-        </div>
+          <div className="mb-12 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/registro">
+              <Button className="h-10 px-5">Crear cuenta</Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="outline" className="h-10 px-5">
+                Entrar al sistema
+              </Button>
+            </Link>
+          </div>
+        </section>
 
-        <section className="max-w-2xl rounded-md border border-border bg-card p-6">
-          <h2 className="mb-3 text-xl font-semibold">Incluye</h2>
-          <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
-            <li>Gestión de horarios</li>
-            <li>Gestión de usuarios por roles</li>
-            <li>Registro de auditoría</li>
-          </ul>
+        <section className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3">
+          <article className="surface p-5">
+            <h2 className="mb-2 text-lg font-semibold tracking-tight">Gestión de horarios</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Crea, edita y consulta turnos de forma clara.
+            </p>
+          </article>
+          <article className="surface p-5">
+            <h2 className="mb-2 text-lg font-semibold tracking-tight">Usuarios por roles</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Control de accesos para administrador, gerente y empleado.
+            </p>
+          </article>
+          <article className="surface p-5">
+            <h2 className="mb-2 text-lg font-semibold tracking-tight">Auditoría</h2>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Registro de cambios y trazabilidad de acciones clave.
+            </p>
+          </article>
         </section>
       </main>
     </div>
