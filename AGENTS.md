@@ -6,8 +6,8 @@ Usted es un experto senior. Su misión es construir ClockHub optimizando el stac
    - **Hashing:** Use `bcryptjs` para hash y verificación de contraseñas.
    - **Env Vars:** Use `process.env` y `dotenv` en scripts/CLI si aplica.
    - **File I/O:** Use APIs nativas de Node (`fs/promises`) para lectura de configuración o semillas.
-   - **Bun:** Déjelo solo como instalador de paquetes (no como runtime principal).
-   - **Runtime:** Use scripts con `next`, `npm`/`npx` y Prisma.
+   - **Bun:** Úselo como gestor de paquetes y runtime de scripts.
+   - **Runtime:** Use scripts con `next`, `bun`/`bunx` y Prisma.
 
 2. **Security & Auth (JWT Secure):**
    - Use `jose` para JWT (compatible con Edge).
