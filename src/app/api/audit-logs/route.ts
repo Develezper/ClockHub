@@ -1,7 +1,11 @@
 import { getAuditLogsAction } from "@/actions/audit";
-import { fromActionResult } from "@/lib/api-response";
+import { fail, fromActionResult } from "@/lib/api-response";
 
 export async function GET() {
-  const result = await getAuditLogsAction();
-  return fromActionResult(result);
+  try {
+    const result = await getAuditLogsAction();
+    return fromActionResult(result);
+  } catch {
+    return fail("No se pudo procesar la solicitud", 500, "INTERNAL_ERROR");
+  }
 }

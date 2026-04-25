@@ -96,14 +96,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const createUser = useCallback(async (data: UserFormData): Promise<MutationResult> => {
     dispatch({ type: "LOAD_START" });
 
-    const response = await createUserAction(data);
-    if (response.success) {
-      await refreshUsers();
-      return { success: true, message: response.message };
-    }
+    try {
+      const response = await createUserAction(data);
+      if (response.success) {
+        await refreshUsers();
+        return { success: true, message: response.message };
+      }
 
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible crear el usuario" };
+    }
   }, [refreshUsers]);
 
   const updateUser = useCallback(async (id: string, data: Partial<UserFormData>): Promise<MutationResult> => {
@@ -114,62 +119,82 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     dispatch({ type: "LOAD_START" });
 
-    const response = await updateUserAction({
-      id,
-      name: data.name ?? existing.name,
-      email: data.email ?? existing.email,
-      role: data.role ?? existing.role,
-      status: data.status ?? existing.status,
-      teamId: data.teamId ?? existing.teamId ?? null,
-      password: data.password,
-    });
+    try {
+      const response = await updateUserAction({
+        id,
+        name: data.name ?? existing.name,
+        email: data.email ?? existing.email,
+        role: data.role ?? existing.role,
+        status: data.status ?? existing.status,
+        teamId: data.teamId ?? existing.teamId ?? null,
+        password: data.password,
+      });
 
-    if (response.success) {
-      await refreshUsers();
-      return { success: true, message: response.message };
+      if (response.success) {
+        await refreshUsers();
+        return { success: true, message: response.message };
+      }
+
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible actualizar el usuario" };
     }
-
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
   }, [refreshUsers, state.users]);
 
   const deleteUser = useCallback(async (id: string): Promise<MutationResult> => {
     dispatch({ type: "LOAD_START" });
 
-    const response = await deleteUserAction(id);
-    if (response.success) {
-      await refreshUsers();
-      return { success: true, message: response.message };
-    }
+    try {
+      const response = await deleteUserAction(id);
+      if (response.success) {
+        await refreshUsers();
+        return { success: true, message: response.message };
+      }
 
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible eliminar el usuario" };
+    }
   }, [refreshUsers]);
 
   const changeUserRole = useCallback(async (id: string, role: UserRole): Promise<MutationResult> => {
     dispatch({ type: "LOAD_START" });
 
-    const response = await changeUserRoleAction({ id, role });
-    if (response.success) {
-      await refreshUsers();
-      return { success: true, message: response.message };
-    }
+    try {
+      const response = await changeUserRoleAction({ id, role });
+      if (response.success) {
+        await refreshUsers();
+        return { success: true, message: response.message };
+      }
 
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible cambiar el rol del usuario" };
+    }
   }, [refreshUsers]);
 
   const changeUserStatus = useCallback(async (id: string, status: UserStatus): Promise<MutationResult> => {
     dispatch({ type: "LOAD_START" });
 
-    const response = await changeUserStatusAction({ id, status });
-    if (response.success) {
-      await refreshUsers();
-      return { success: true, message: response.message };
-    }
+    try {
+      const response = await changeUserStatusAction({ id, status });
+      if (response.success) {
+        await refreshUsers();
+        return { success: true, message: response.message };
+      }
 
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible cambiar el estado del usuario" };
+    }
   }, [refreshUsers]);
 
   return (

@@ -7,18 +7,29 @@ type RouteContext = {
 };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
+  let body: unknown;
+
   try {
-    const body = await request.json();
+    body = await request.json();
+  } catch {
+    return fail("JSON inválido", 400, "VALIDATION_ERROR");
+  }
+
+  try {
     const { id } = await context.params;
     const result = await updateUserAction({ ...body, id });
     return fromActionResult(result);
   } catch {
-    return fail("JSON inválido", 400, "VALIDATION_ERROR");
+    return fail("No se pudo procesar la solicitud", 500, "INTERNAL_ERROR");
   }
 }
 
 export async function DELETE(_: NextRequest, context: RouteContext) {
-  const { id } = await context.params;
-  const result = await deleteUserAction(id);
-  return fromActionResult(result);
+  try {
+    const { id } = await context.params;
+    const result = await deleteUserAction(id);
+    return fromActionResult(result);
+  } catch {
+    return fail("No se pudo procesar la solicitud", 500, "INTERNAL_ERROR");
+  }
 }

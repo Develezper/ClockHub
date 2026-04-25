@@ -121,14 +121,19 @@ export function ScheduleProvider({ children }: { children: ReactNode }) {
   const createSchedule = useCallback(async (data: ScheduleFormData): Promise<MutationResult> => {
     dispatch({ type: "LOAD_START" });
 
-    const response = await createScheduleAction(data);
-    if (response.success) {
-      await refreshSchedules();
-      return { success: true, message: response.message };
-    }
+    try {
+      const response = await createScheduleAction(data);
+      if (response.success) {
+        await refreshSchedules();
+        return { success: true, message: response.message };
+      }
 
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible crear el horario" };
+    }
   }, [refreshSchedules]);
 
   const updateSchedule = useCallback(async (id: string, data: Partial<ScheduleFormData>): Promise<MutationResult> => {
@@ -139,36 +144,46 @@ export function ScheduleProvider({ children }: { children: ReactNode }) {
 
     dispatch({ type: "LOAD_START" });
 
-    const response = await updateScheduleAction({
-      id,
-      title: data.title ?? existing.title,
-      description: data.description ?? existing.description ?? null,
-      startTime: data.startTime ?? new Date(existing.startTime).toISOString(),
-      endTime: data.endTime ?? new Date(existing.endTime).toISOString(),
-      userId: data.userId ?? existing.userId,
-      status: data.status ?? existing.status,
-    });
+    try {
+      const response = await updateScheduleAction({
+        id,
+        title: data.title ?? existing.title,
+        description: data.description ?? existing.description ?? null,
+        startTime: data.startTime ?? new Date(existing.startTime).toISOString(),
+        endTime: data.endTime ?? new Date(existing.endTime).toISOString(),
+        userId: data.userId ?? existing.userId,
+        status: data.status ?? existing.status,
+      });
 
-    if (response.success) {
-      await refreshSchedules();
-      return { success: true, message: response.message };
+      if (response.success) {
+        await refreshSchedules();
+        return { success: true, message: response.message };
+      }
+
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible actualizar el horario" };
     }
-
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
   }, [refreshSchedules, state.schedules]);
 
   const deleteSchedule = useCallback(async (id: string): Promise<MutationResult> => {
     dispatch({ type: "LOAD_START" });
 
-    const response = await cancelScheduleAction({ id });
-    if (response.success) {
-      await refreshSchedules();
-      return { success: true, message: response.message };
-    }
+    try {
+      const response = await cancelScheduleAction({ id });
+      if (response.success) {
+        await refreshSchedules();
+        return { success: true, message: response.message };
+      }
 
-    dispatch({ type: "LOAD_END" });
-    return { success: false, message: response.message };
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: response.message };
+    } catch {
+      dispatch({ type: "LOAD_END" });
+      return { success: false, message: "No fue posible cancelar el horario" };
+    }
   }, [refreshSchedules]);
 
   return (

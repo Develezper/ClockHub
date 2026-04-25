@@ -50,8 +50,14 @@ export function statusFromCode(code?: string): number {
     case "INVALID_USER":
     case "INVALID_SCHEDULE":
       return 400;
+    case "INTERNAL_ERROR":
+    case "LOGIN_ERROR":
+    case "REGISTER_ERROR":
+    case "LOGOUT_ERROR":
+    case "TOKEN_ROTATION_ERROR":
+      return 500;
     default:
-      return 400;
+      return 500;
   }
 }
 

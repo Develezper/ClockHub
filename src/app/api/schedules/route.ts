@@ -3,16 +3,27 @@ import { createScheduleAction, getSchedulesAction } from "@/actions/schedules";
 import { fail, fromActionResult } from "@/lib/api-response";
 
 export async function GET() {
-  const result = await getSchedulesAction();
-  return fromActionResult(result);
+  try {
+    const result = await getSchedulesAction();
+    return fromActionResult(result);
+  } catch {
+    return fail("No se pudo procesar la solicitud", 500, "INTERNAL_ERROR");
+  }
 }
 
 export async function POST(request: NextRequest) {
+  let body: unknown;
+
   try {
-    const body = await request.json();
+    body = await request.json();
+  } catch {
+    return fail("JSON inválido", 400, "VALIDATION_ERROR");
+  }
+
+  try {
     const result = await createScheduleAction(body);
     return fromActionResult(result);
   } catch {
-    return fail("JSON inválido", 400, "VALIDATION_ERROR");
+    return fail("No se pudo procesar la solicitud", 500, "INTERNAL_ERROR");
   }
 }
