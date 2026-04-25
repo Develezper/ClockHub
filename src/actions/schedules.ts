@@ -46,6 +46,59 @@ function canMutateSchedules(role: string): boolean {
   return role === "ADMIN" || role === "MANAGER";
 }
 
+async function canManagerAccessUser(actorId: number, actorTeamId: string | undefined, targetUserId: number) {
+  if (targetUserId === actorId) {
+    return true;
+  }
+
+  if (!actorTeamId) {
+    return false;
+  }
+
+  const target = await db.user.findUnique({
+    where: { id: targetUserId },
+    select: { id: true, teamId: true, status: true },
+  });
+
+  return Boolean(target && target.status === "ACTIVE" && target.teamId === actorTeamId);
+}
+
+async function assertUserCanBeScheduled(actor: { id: number; role: string; teamId?: string }, targetUserId: number) {
+  const target = await db.user.findUnique({
+    where: { id: targetUserId },
+    select: { id: true, status: true, teamId: true },
+  });
+
+  if (!target || target.status !== "ACTIVE") {
+    return { ok: false as const, response: { success: false, message: "Usuario inválido", code: "INVALID_USER" } };
+  }
+
+  if (actor.role === "MANAGER") {
+    const managerAllowed = await canManagerAccessUser(actor.id, actor.teamId, target.id);
+    if (!managerAllowed) {
+      return { ok: false as const, response: { success: false, message: "No autorizado", code: "FORBIDDEN" } };
+    }
+  }
+
+  return { ok: true as const };
+}
+
+async function assertManagerCanAccessSchedule(
+  actor: { id: number; role: string; teamId?: string },
+  scheduleUserId: number,
+) {
+  if (actor.role !== "MANAGER") {
+    return { ok: true as const };
+  }
+
+  const managerAllowed = await canManagerAccessUser(actor.id, actor.teamId, scheduleUserId);
+  if (!managerAllowed) {
+    return { ok: false as const, response: { success: false, message: "No autorizado", code: "FORBIDDEN" } };
+  }
+
+  return { ok: true as const };
+}
+
 async function hasConflict(userId: number, startAt: Date, endAt: Date, excludeId?: number) {
   const conflict = await db.schedule.findFirst({
     where: {
@@ -64,7 +117,19 @@ export async function getSchedulesAction(): Promise<ApiResponse<Schedule[]>> {
   const auth = await requireActor();
   if (!auth.ok) return auth.response;
 
+  const where =
+    auth.actor.role === "ADMIN"
+      ? undefined
+      : auth.actor.role === "MANAGER"
+        ? auth.actor.teamId
+          ? {
+              OR: [{ userId: auth.actor.id }, { user: { teamId: auth.actor.teamId } }],
+            }
+          : { userId: auth.actor.id }
+        : { userId: auth.actor.id };
+
   const schedules = await db.schedule.findMany({
+    where,
     orderBy: { startAt: "desc" },
   });
 
@@ -93,6 +158,9 @@ export async function createScheduleAction(input: unknown): Promise<ApiResponse<
     return { success: false, message: "Usuario inválido", code: "INVALID_USER" };
   }
 
+  const allowedUser = await assertUserCanBeScheduled(auth.actor, userId);
+  if (!allowedUser.ok) return allowedUser.response;
+
   const startAt = new Date(parsed.data.startTime);
   const endAt = new Date(parsed.data.endTime);
 
@@ -108,7 +176,7 @@ export async function createScheduleAction(input: unknown): Promise<ApiResponse<
       endAt,
       userId,
       createdById: auth.actor.id,
-      status: parsed.data.status === "CANCELLED" ? "CANCELLED" : "ACTIVE",
+      status: "ACTIVE",
     },
   });
 
@@ -157,6 +225,12 @@ export async function updateScheduleAction(input: unknown): Promise<ApiResponse<
     return { success: false, message: "Horario no encontrado", code: "SCHEDULE_NOT_FOUND" };
   }
 
+  const managerCanAccessExisting = await assertManagerCanAccessSchedule(auth.actor, existing.userId);
+  if (!managerCanAccessExisting.ok) return managerCanAccessExisting.response;
+
+  const allowedTargetUser = await assertUserCanBeScheduled(auth.actor, userId);
+  if (!allowedTargetUser.ok) return allowedTargetUser.response;
+
   const startAt = new Date(parsed.data.startTime);
   const endAt = new Date(parsed.data.endTime);
 
@@ -172,7 +246,7 @@ export async function updateScheduleAction(input: unknown): Promise<ApiResponse<
       startAt,
       endAt,
       userId,
-      status: parsed.data.status === "CANCELLED" ? "CANCELLED" : "ACTIVE",
+      status: "ACTIVE",
     },
   });
 
@@ -225,6 +299,9 @@ export async function cancelScheduleAction(input: unknown): Promise<ApiResponse<
   if (!existing) {
     return { success: false, message: "Horario no encontrado", code: "SCHEDULE_NOT_FOUND" };
   }
+
+  const managerCanAccessExisting = await assertManagerCanAccessSchedule(auth.actor, existing.userId);
+  if (!managerCanAccessExisting.ok) return managerCanAccessExisting.response;
 
   await db.schedule.update({
     where: { id: scheduleId },

@@ -12,6 +12,7 @@ function toUserModel(user: {
   id: number;
   name: string;
   email: string;
+  teamId: string | null;
   role: Role;
   status: UserStatus;
   createdAt: Date;
@@ -21,6 +22,7 @@ function toUserModel(user: {
     id: String(user.id),
     name: user.name,
     email: user.email,
+    teamId: user.teamId ?? undefined,
     role: user.role,
     status: user.status,
     createdAt: user.createdAt,
@@ -54,7 +56,19 @@ export async function getUsersAction(): Promise<ApiResponse<User[]>> {
   const auth = await requireAuthenticatedActor();
   if (!auth.ok) return auth.response;
 
+  const where =
+    auth.actor.role === "ADMIN"
+      ? undefined
+      : auth.actor.role === "MANAGER"
+        ? auth.actor.teamId
+          ? {
+              OR: [{ id: auth.actor.id }, { teamId: auth.actor.teamId }],
+            }
+          : { id: auth.actor.id }
+        : { id: auth.actor.id };
+
   const users = await db.user.findMany({
+    where,
     orderBy: { createdAt: "desc" },
   });
 
@@ -86,6 +100,7 @@ export async function createUserAction(input: unknown): Promise<ApiResponse<User
       name: parsed.data.name,
       email,
       password: passwordHash,
+      teamId: parsed.data.teamId?.trim() || null,
       role: parsed.data.role,
       status: parsed.data.status,
     },
@@ -97,7 +112,7 @@ export async function createUserAction(input: unknown): Promise<ApiResponse<User
     entity: "USER",
     entityId: String(user.id),
     message: "Usuario creado desde panel de administración",
-    meta: { createdEmail: user.email, role: user.role },
+    meta: { createdEmail: user.email, role: user.role, teamId: user.teamId },
   });
 
   return {
@@ -145,6 +160,7 @@ export async function updateUserAction(input: unknown): Promise<ApiResponse<User
     data: {
       name: parsed.data.name,
       email,
+      teamId: parsed.data.teamId?.trim() || null,
       role: parsed.data.role,
       status: parsed.data.status,
       ...(password ? { password } : {}),
@@ -158,8 +174,8 @@ export async function updateUserAction(input: unknown): Promise<ApiResponse<User
     entityId: String(updated.id),
     message: "Usuario actualizado",
     meta: {
-      before: { role: existing.role, status: existing.status },
-      after: { role: updated.role, status: updated.status },
+      before: { role: existing.role, status: existing.status, teamId: existing.teamId },
+      after: { role: updated.role, status: updated.status, teamId: updated.teamId },
     },
   });
 

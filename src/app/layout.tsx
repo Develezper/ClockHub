@@ -7,8 +7,7 @@ import "./globals.css";
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
-const bun = (globalThis as typeof globalThis & { Bun?: { env?: Record<string, string | undefined> } }).Bun;
-const isProduction = bun?.env?.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === "production";
 
 export const metadata: Metadata = {
   title: "ClockHub - Gestión de Horarios",

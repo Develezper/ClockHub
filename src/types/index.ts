@@ -14,7 +14,7 @@ export interface User {
 }
 
 // Tipos de Horario
-export type ScheduleStatus = 'SCHEDULED' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+export type ScheduleStatus = 'SCHEDULED' | 'CANCELLED';
 
 export interface Schedule {
   id: string;
@@ -134,9 +134,7 @@ export const ROLE_PERMISSIONS = {
 // Traducciones
 export const STATUS_LABELS: Record<ScheduleStatus, string> = {
   SCHEDULED: 'Programado',
-  CONFIRMED: 'Confirmado',
   CANCELLED: 'Cancelado',
-  COMPLETED: 'Completado',
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {

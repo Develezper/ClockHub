@@ -39,8 +39,6 @@ export function SchedulesFilters({
             <SelectContent>
               <SelectItem value="all">Todos los estados</SelectItem>
               <SelectItem value="SCHEDULED">Programado</SelectItem>
-              <SelectItem value="CONFIRMED">Confirmado</SelectItem>
-              <SelectItem value="COMPLETED">Completado</SelectItem>
               <SelectItem value="CANCELLED">Cancelado</SelectItem>
             </SelectContent>
           </Select>

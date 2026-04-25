@@ -4,8 +4,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
-const bun = (globalThis as typeof globalThis & { Bun?: { env?: Record<string, string | undefined> } }).Bun;
-const nodeEnv = bun?.env?.NODE_ENV ?? "development";
+const nodeEnv = process.env.NODE_ENV ?? "development";
 
 export const db =
   globalForPrisma.prisma ??

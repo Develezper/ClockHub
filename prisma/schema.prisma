@@ -38,6 +38,7 @@ model User {
   name             String
   email            String      @unique
   password         String
+  teamId           String?
   role             Role        @default(EMPLOYEE)
   status           UserStatus  @default(ACTIVE)
   createdAt        DateTime    @default(now())
@@ -45,6 +46,8 @@ model User {
   schedules        Schedule[]
   createdSchedules Schedule[]  @relation("ScheduleCreator")
   auditLogs        AuditLog[]
+
+  @@index([teamId])
 }
 
 model Schedule {

@@ -15,6 +15,7 @@ type SessionUser = {
   id: number;
   name: string;
   email: string;
+  teamId: string | null;
   role: UserRole;
   status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
   createdAt: string;
@@ -98,6 +99,7 @@ function toContextUser(user: SessionUser): User {
     id: String(user.id),
     name: user.name,
     email: user.email,
+    teamId: user.teamId ?? undefined,
     role: user.role,
     status: user.status,
     createdAt: new Date(user.createdAt),

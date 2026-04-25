@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const { users } = useUsers();
 
   const activeSchedules = schedules.filter((s) => s.status !== "CANCELLED");
-  const confirmedSchedules = schedules.filter((s) => s.status === "CONFIRMED");
+  const cancelledSchedules = schedules.filter((s) => s.status === "CANCELLED");
   const pendingSchedules = schedules.filter((s) => s.status === "SCHEDULED");
   const activeUsers = users.filter((u) => u.status === "ACTIVE");
 
@@ -56,8 +56,8 @@ export default function DashboardPage() {
             <p className="mt-1 text-2xl font-semibold">{activeSchedules.length}</p>
           </div>
           <div className="rounded-md border border-border bg-card/40 p-4">
-            <p className="text-sm text-muted-foreground">Confirmados</p>
-            <p className="mt-1 text-2xl font-semibold">{confirmedSchedules.length}</p>
+            <p className="text-sm text-muted-foreground">Cancelados</p>
+            <p className="mt-1 text-2xl font-semibold">{cancelledSchedules.length}</p>
           </div>
           <div className="rounded-md border border-border bg-card/40 p-4">
             <p className="text-sm text-muted-foreground">Pendientes</p>

@@ -39,7 +39,24 @@ export async function getAuditLogsAction(): Promise<ApiResponse<AuditLog[]>> {
     return { success: false, message: "No autorizado", code: "FORBIDDEN" };
   }
 
+  const where =
+    actor.role === "ADMIN"
+      ? undefined
+      : {
+          OR: [
+            { userId: actor.id },
+            actor.teamId
+              ? {
+                  user: {
+                    teamId: actor.teamId,
+                  },
+                }
+              : { userId: actor.id },
+          ],
+        };
+
   const logs = await db.auditLog.findMany({
+    where,
     orderBy: { createdAt: "desc" },
     take: 300,
   });

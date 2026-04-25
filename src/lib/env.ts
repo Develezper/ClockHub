@@ -1,6 +1,7 @@
 export type AppEnv = {
   NODE_ENV: string;
   DATABASE_URL?: string;
+  DIRECT_URL?: string;
   JWT_ACCESS_SECRET: string;
   JWT_REFRESH_SECRET: string;
   JWT_ISSUER: string;
@@ -13,8 +14,7 @@ export type AppEnv = {
 };
 
 function readEnv(key: string): string | undefined {
-  const bun = (globalThis as typeof globalThis & { Bun?: { env?: Record<string, string | undefined> } }).Bun;
-  return bun?.env?.[key];
+  return process.env[key];
 }
 
 function requireEnv(key: string): string {
@@ -38,6 +38,7 @@ function readNumber(key: string, defaultValue: number): number {
 export const env: AppEnv = {
   NODE_ENV: readEnv("NODE_ENV") ?? "development",
   DATABASE_URL: readEnv("DATABASE_URL"),
+  DIRECT_URL: readEnv("DIRECT_URL"),
   JWT_ACCESS_SECRET: requireEnv("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: requireEnv("JWT_REFRESH_SECRET"),
   JWT_ISSUER: readEnv("JWT_ISSUER") ?? "clockhub-auth",

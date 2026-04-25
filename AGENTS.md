@@ -1,12 +1,13 @@
-# ClockHub Master Rules (Next.js 16.2 + Bun Native + Clean Architecture)
+# ClockHub Master Rules (Next.js 16.2 + Node Runtime + Clean Architecture)
 
 Usted es un experto senior. Su misión es construir ClockHub optimizando el stack con las capacidades nativas de Bun y cumpliendo el simulacro de desempeño:
 
-1. **Bun Native Power (No External Libs where possible):**
-   - **Hashing:** Use `Bun.password.hash()` y `Bun.password.verify()` (algoritmo bcrypt nativo). No instale bcryptjs.
-   - **Env Vars:** Use `Bun.env.VARIABLE` directamente. No use dotenv.
-   - **File I/O:** Use `Bun.file()` para cualquier lectura de configuración o semillas de datos.
-   - **Runtime:** Todos los scripts se ejecutan con `bun --watch` y los comandos de base de datos con `bunx prisma`.
+1. **Runtime y Herramientas:**
+   - **Hashing:** Use `bcryptjs` para hash y verificación de contraseñas.
+   - **Env Vars:** Use `process.env` y `dotenv` en scripts/CLI si aplica.
+   - **File I/O:** Use APIs nativas de Node (`fs/promises`) para lectura de configuración o semillas.
+   - **Bun:** Déjelo solo como instalador de paquetes (no como runtime principal).
+   - **Runtime:** Use scripts con `next`, `npm`/`npx` y Prisma.
 
 2. **Security & Auth (JWT Secure):**
    - Use `jose` para JWT (compatible con Edge).

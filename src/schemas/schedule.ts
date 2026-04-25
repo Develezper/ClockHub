@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const scheduleStatusSchema = z.enum(["SCHEDULED", "CONFIRMED", "COMPLETED", "CANCELLED"]);
+export const scheduleStatusSchema = z.enum(["SCHEDULED", "CANCELLED"]);
 
 const scheduleBaseSchema = z.object({
   title: z.string().trim().min(2).max(140),
@@ -8,7 +8,7 @@ const scheduleBaseSchema = z.object({
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
   userId: z.string().trim().min(1),
-  status: scheduleStatusSchema,
+  status: z.literal("SCHEDULED"),
 });
 
 export const createScheduleSchema = scheduleBaseSchema

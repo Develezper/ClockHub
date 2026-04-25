@@ -5,6 +5,7 @@ export type SafeAuthUser = {
   id: number;
   name: string;
   email: string;
+  teamId: string | null;
   role: Role;
   status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
   createdAt: string;
@@ -16,6 +17,7 @@ export function toSafeAuthUser(user: User): SafeAuthUser {
     id: user.id,
     name: user.name,
     email: user.email,
+    teamId: user.teamId,
     role: user.role,
     status: user.status,
     createdAt: user.createdAt.toISOString(),

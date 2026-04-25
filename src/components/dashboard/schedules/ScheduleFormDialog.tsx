@@ -117,8 +117,6 @@ export function ScheduleFormDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="SCHEDULED">Programado</SelectItem>
-                <SelectItem value="CONFIRMED">Confirmado</SelectItem>
-                {isEditMode && <SelectItem value="COMPLETED">Completado</SelectItem>}
               </SelectContent>
             </Select>
           </div>
