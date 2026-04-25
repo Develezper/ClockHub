@@ -44,7 +44,7 @@ export default function AuditPage() {
   // Redirect if no permission
   useEffect(() => {
     if (currentUser && !hasPermission("canViewAudit")) {
-      router.push("/dashboard");
+      router.replace("/dashboard");
     }
   }, [currentUser, hasPermission, router]);
 

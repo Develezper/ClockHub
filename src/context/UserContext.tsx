@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback, useRef, type ReactNode } from "react";
 import {
   changeUserRoleAction,
   changeUserStatusAction,
@@ -58,6 +58,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(userReducer, initialState);
+  const hasInitialized = useRef(false);
 
   const refreshUsers = useCallback(async () => {
     dispatch({ type: "LOAD_START" });
@@ -75,6 +76,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (hasInitialized.current) {
+      return;
+    }
+
+    hasInitialized.current = true;
     void refreshUsers();
   }, [refreshUsers]);
 

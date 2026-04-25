@@ -60,7 +60,7 @@ export default function UsersPage() {
   // Redirect if not admin
   useEffect(() => {
     if (currentUser && !hasPermission("canManageUsers")) {
-      router.push("/dashboard");
+      router.replace("/dashboard");
     }
   }, [currentUser, hasPermission, router]);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useEffect, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useEffect, useCallback, useRef, type ReactNode } from "react";
 import {
   cancelScheduleAction,
   createScheduleAction,
@@ -55,6 +55,7 @@ const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined
 
 export function ScheduleProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(scheduleReducer, initialState);
+  const hasInitialized = useRef(false);
 
   const refreshSchedules = useCallback(async () => {
     dispatch({ type: "LOAD_START" });
@@ -72,6 +73,11 @@ export function ScheduleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (hasInitialized.current) {
+      return;
+    }
+
+    hasInitialized.current = true;
     void refreshSchedules();
   }, [refreshSchedules]);
 

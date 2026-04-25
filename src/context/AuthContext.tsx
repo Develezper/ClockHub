@@ -122,6 +122,7 @@ async function parseAuthResponse<T>(response: Response): Promise<AuthApiResponse
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const authOperationId = useRef(0);
+  const hasHydratedSession = useRef(false);
 
   const beginAuthOperation = useCallback(() => {
     authOperationId.current += 1;
@@ -151,11 +152,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       let { response, body } = await readSession();
 
       if (response.status === 401) {
-        await fetch("/api/auth/refresh", {
+        const refreshResponse = await fetch("/api/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
-        ({ response, body } = await readSession());
+
+        if (refreshResponse.ok) {
+          ({ response, body } = await readSession());
+        }
       }
 
       if (!isLatestAuthOperation(operationId)) {
@@ -175,6 +179,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [beginAuthOperation, isLatestAuthOperation, readSession]);
 
   useEffect(() => {
+    if (hasHydratedSession.current) {
+      return;
+    }
+
+    hasHydratedSession.current = true;
     void hydrateSession();
   }, [hydrateSession]);
 

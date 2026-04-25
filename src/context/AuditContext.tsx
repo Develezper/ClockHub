@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useCallback, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef, type ReactNode } from "react";
 import { getAuditLogsAction } from "@/actions/audit";
 import type { AuditLog } from "@/types";
 
@@ -42,6 +42,7 @@ const AuditContext = createContext<AuditContextType | undefined>(undefined);
 
 export function AuditProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(auditReducer, initialState);
+  const hasInitialized = useRef(false);
 
   const refreshAuditLogs = useCallback(async () => {
     dispatch({ type: "LOAD_START" });
@@ -59,6 +60,11 @@ export function AuditProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (hasInitialized.current) {
+      return;
+    }
+
+    hasInitialized.current = true;
     void refreshAuditLogs();
   }, [refreshAuditLogs]);
 
