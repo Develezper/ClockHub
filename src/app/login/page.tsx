@@ -21,28 +21,38 @@ export default function LoginPage() {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail || !password) {
       setError("Por favor completa todos los campos");
       return;
     }
 
-    const result = await login(email, password);
+    setIsSubmitting(true);
 
-    if (result.success) {
-      const nextPath = searchParams.get("next");
-      router.push(nextPath && nextPath.startsWith("/") ? nextPath : "/dashboard");
-    } else {
+    try {
+      const result = await login(normalizedEmail, password);
+
+      if (result.success) {
+        const nextPath = searchParams.get("next");
+        router.replace(nextPath && nextPath.startsWith("/") ? nextPath : "/dashboard");
+        return;
+      }
+
       setError(result.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,9 +79,10 @@ function LoginPageContent() {
               <Input
                 id="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="h-10"
               />
             </div>
@@ -81,15 +92,16 @@ function LoginPageContent() {
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="h-10"
               />
             </div>
 
-            <Button type="submit" className="h-10 w-full" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="h-10 w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
                   <Spinner className="h-4 w-4" />
                   Cargando...

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { User, UserRole } from "@/types";
 import { ROLE_PERMISSIONS } from "@/types";
 
@@ -90,6 +90,16 @@ async function parseAuthResponse<T>(response: Response): Promise<AuthApiResponse
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const authOperationId = useRef(0);
+
+  const beginAuthOperation = useCallback(() => {
+    authOperationId.current += 1;
+    return authOperationId.current;
+  }, []);
+
+  const isLatestAuthOperation = useCallback((operationId: number) => {
+    return authOperationId.current === operationId;
+  }, []);
 
   const readSession = useCallback(async () => {
     const response = await fetch("/api/auth/me", {
@@ -103,6 +113,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const hydrateSession = useCallback(async () => {
+    const operationId = beginAuthOperation();
+
     try {
       let { response, body } = await readSession();
 
@@ -114,73 +126,100 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ({ response, body } = await readSession());
       }
 
+      if (!isLatestAuthOperation(operationId)) {
+        return;
+      }
+
       if (response.ok && body.success && body.data?.user) {
         setUser(toContextUser(body.data.user));
       } else {
         setUser(null);
       }
     } catch {
-      setUser(null);
+      if (isLatestAuthOperation(operationId)) {
+        setUser(null);
+      }
     } finally {
-      setIsLoading(false);
+      if (isLatestAuthOperation(operationId)) {
+        setIsLoading(false);
+      }
     }
-  }, [readSession]);
+  }, [beginAuthOperation, isLatestAuthOperation, readSession]);
 
   useEffect(() => {
     void hydrateSession();
   }, [hydrateSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    setIsLoading(true);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const operationId = beginAuthOperation();
+      setIsLoading(true);
 
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
+        });
 
-      const body = await parseAuthResponse<{ user: SessionUser }>(response);
-      if (!response.ok || !body.success || !body.data?.user) {
-        return { success: false, message: body.message || "Credenciales inválidas" };
+        const body = await parseAuthResponse<{ user: SessionUser }>(response);
+        if (!response.ok || !body.success || !body.data?.user) {
+          return { success: false, message: body.message || "Credenciales inválidas" };
+        }
+
+        if (isLatestAuthOperation(operationId)) {
+          setUser(toContextUser(body.data.user));
+        }
+
+        return { success: true, message: body.message };
+      } catch {
+        return { success: false, message: "No fue posible iniciar sesión" };
+      } finally {
+        if (isLatestAuthOperation(operationId)) {
+          setIsLoading(false);
+        }
       }
+    },
+    [beginAuthOperation, isLatestAuthOperation],
+  );
 
-      setUser(toContextUser(body.data.user));
-      return { success: true, message: body.message };
-    } catch {
-      return { success: false, message: "No fue posible iniciar sesión" };
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const register = useCallback(
+    async (name: string, email: string, password: string) => {
+      const operationId = beginAuthOperation();
+      setIsLoading(true);
 
-  const register = useCallback(async (name: string, email: string, password: string) => {
-    setIsLoading(true);
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ name, email, password }),
+        });
 
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, email, password }),
-      });
+        const body = await parseAuthResponse<{ user: SessionUser }>(response);
+        if (!response.ok || !body.success || !body.data?.user) {
+          return { success: false, message: body.message || "No fue posible registrarse" };
+        }
 
-      const body = await parseAuthResponse<{ user: SessionUser }>(response);
-      if (!response.ok || !body.success || !body.data?.user) {
-        return { success: false, message: body.message || "No fue posible registrarse" };
+        if (isLatestAuthOperation(operationId)) {
+          setUser(toContextUser(body.data.user));
+        }
+
+        return { success: true, message: body.message };
+      } catch {
+        return { success: false, message: "No fue posible registrarse" };
+      } finally {
+        if (isLatestAuthOperation(operationId)) {
+          setIsLoading(false);
+        }
       }
-
-      setUser(toContextUser(body.data.user));
-      return { success: true, message: body.message };
-    } catch {
-      return { success: false, message: "No fue posible registrarse" };
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [beginAuthOperation, isLatestAuthOperation],
+  );
 
   const logout = useCallback(async () => {
+    const operationId = beginAuthOperation();
     setIsLoading(true);
 
     try {
@@ -189,10 +228,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials: "include",
       });
     } finally {
-      setUser(null);
-      setIsLoading(false);
+      if (isLatestAuthOperation(operationId)) {
+        setUser(null);
+        setIsLoading(false);
+      }
     }
-  }, []);
+  }, [beginAuthOperation, isLatestAuthOperation]);
 
   const hasPermission = useCallback(
     (permission: keyof typeof ROLE_PERMISSIONS.ADMIN) => {
