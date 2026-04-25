@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Calendar,
   Plus,
@@ -11,7 +11,6 @@ import {
   Trash2,
   Eye,
   Clock,
-  User,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -96,44 +95,40 @@ export default function SchedulesPage() {
   const canDelete = hasPermission("canDeleteSchedules");
   const canViewAll = hasPermission("canViewAllSchedules");
 
-  // Filter schedules based on role and filters
-  const filteredSchedules = schedules
-    .filter((schedule) => {
-      // Role-based filtering
-      if (!canViewAll && user) {
-        // Manager sees team schedules, Employee sees only their own
-        if (user.role === "MANAGER") {
-          const scheduleUser = users.find(u => u.id === schedule.userId);
-          if (scheduleUser?.teamId !== user.teamId && schedule.userId !== user.id) {
-            return false;
-          }
-        } else if (user.role === "EMPLOYEE") {
-          if (schedule.userId !== user.id) {
+  const usersById = useMemo(() => {
+    return new Map(users.map((u) => [u.id, u]));
+  }, [users]);
+
+  const filteredSchedules = useMemo(() => {
+    return schedules
+      .filter((schedule) => {
+        if (!canViewAll && user) {
+          if (user.role === "MANAGER") {
+            const scheduleUser = usersById.get(schedule.userId);
+            if (scheduleUser?.teamId !== user.teamId && schedule.userId !== user.id) {
+              return false;
+            }
+          } else if (user.role === "EMPLOYEE" && schedule.userId !== user.id) {
             return false;
           }
         }
-      }
 
-      // Search filter
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        const assignedUser = users.find(u => u.id === schedule.userId);
-        if (
-          !schedule.title.toLowerCase().includes(term) &&
-          !assignedUser?.name.toLowerCase().includes(term)
-        ) {
+        if (searchTerm) {
+          const term = searchTerm.toLowerCase();
+          const assignedUser = usersById.get(schedule.userId);
+          if (!schedule.title.toLowerCase().includes(term) && !assignedUser?.name.toLowerCase().includes(term)) {
+            return false;
+          }
+        }
+
+        if (statusFilter !== "all" && schedule.status !== statusFilter) {
           return false;
         }
-      }
 
-      // Status filter
-      if (statusFilter !== "all" && schedule.status !== statusFilter) {
-        return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+        return true;
+      })
+      .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+  }, [schedules, canViewAll, user, usersById, searchTerm, statusFilter]);
 
   const formatDateTime = (date: Date) => {
     return new Date(date).toLocaleString("es-ES", {
@@ -150,20 +145,7 @@ export default function SchedulesPage() {
     return d.toISOString().slice(0, 16);
   };
 
-  const getStatusColor = (status: ScheduleStatus) => {
-    switch (status) {
-      case "CONFIRMED":
-        return "bg-muted text-foreground";
-      case "SCHEDULED":
-        return "bg-muted text-foreground";
-      case "COMPLETED":
-        return "bg-muted text-foreground";
-      case "CANCELLED":
-        return "bg-muted text-foreground";
-      default:
-        return "bg-muted text-foreground";
-    }
-  };
+  const badgeClassName = "bg-muted text-foreground";
 
   const getInitials = (name: string) => {
     return name
@@ -214,20 +196,28 @@ export default function SchedulesPage() {
     setIsDeleteOpen(true);
   };
 
-  const handleSubmitCreate = async () => {
-    setFormError("");
-
+  const validateScheduleForm = () => {
     if (!formData.title || !formData.startTime || !formData.endTime || !formData.userId) {
-      setFormError("Por favor completa todos los campos obligatorios");
-      return;
+      return "Por favor completa todos los campos obligatorios";
     }
 
     if (new Date(formData.startTime) >= new Date(formData.endTime)) {
-      setFormError("La hora de inicio debe ser anterior a la hora de fin");
+      return "La hora de inicio debe ser anterior a la hora de fin";
+    }
+
+    return "";
+  };
+
+  const handleSubmitCreate = async () => {
+    setFormError("");
+
+    const validationError = validateScheduleForm();
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
-    const result = await createSchedule(formData, user!.id);
+    const result = await createSchedule(formData);
     
     if (result.success) {
       setIsCreateOpen(false);
@@ -240,13 +230,9 @@ export default function SchedulesPage() {
   const handleSubmitEdit = async () => {
     setFormError("");
 
-    if (!formData.title || !formData.startTime || !formData.endTime || !formData.userId) {
-      setFormError("Por favor completa todos los campos obligatorios");
-      return;
-    }
-
-    if (new Date(formData.startTime) >= new Date(formData.endTime)) {
-      setFormError("La hora de inicio debe ser anterior a la hora de fin");
+    const validationError = validateScheduleForm();
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
@@ -270,6 +256,7 @@ export default function SchedulesPage() {
   };
 
   const activeUsers = users.filter(u => u.status === "ACTIVE");
+  const selectedAssignedUser = selectedSchedule ? usersById.get(selectedSchedule.userId) : undefined;
 
   return (
     <div className="flex h-full flex-col">
@@ -346,7 +333,7 @@ export default function SchedulesPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredSchedules.map((schedule) => {
-                      const assignedUser = users.find(u => u.id === schedule.userId);
+                      const assignedUser = usersById.get(schedule.userId);
                       return (
                         <TableRow key={schedule.id}>
                           <TableCell>
@@ -387,7 +374,7 @@ export default function SchedulesPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge className={getStatusColor(schedule.status)}>
+                            <Badge className={badgeClassName}>
                               {STATUS_LABELS[schedule.status]}
                             </Badge>
                           </TableCell>
@@ -676,7 +663,7 @@ export default function SchedulesPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">{selectedSchedule.title}</h3>
-                  <Badge className={getStatusColor(selectedSchedule.status)}>
+                  <Badge className={badgeClassName}>
                     {STATUS_LABELS[selectedSchedule.status]}
                   </Badge>
                 </div>
@@ -704,13 +691,11 @@ export default function SchedulesPage() {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-xs">
-                      {users.find(u => u.id === selectedSchedule.userId)
-                        ? getInitials(users.find(u => u.id === selectedSchedule.userId)!.name)
-                        : "?"}
+                      {selectedAssignedUser ? getInitials(selectedAssignedUser.name) : "?"}
                     </AvatarFallback>
                   </Avatar>
                   <span className="font-medium">
-                    {users.find(u => u.id === selectedSchedule.userId)?.name || "Desconocido"}
+                    {selectedAssignedUser?.name || "Desconocido"}
                   </span>
                 </div>
               </div>

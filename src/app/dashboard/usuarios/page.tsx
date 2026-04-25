@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users,
   Plus,
   Search,
-  Filter,
   MoreHorizontal,
   Edit,
   Trash2,
@@ -78,7 +77,7 @@ import {
 export default function UsersPage() {
   const router = useRouter();
   const { user: currentUser, hasPermission } = useAuth();
-  const { users, createUser, updateUser, deleteUser, changeUserRole, changeUserStatus, isLoading } = useUsers();
+  const { users, createUser, updateUser, deleteUser, changeUserStatus, isLoading } = useUsers();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("all");
@@ -107,31 +106,26 @@ export default function UsersPage() {
     }
   }, [currentUser, hasPermission, router]);
 
-  // Filter users
-  const filteredUsers = users.filter((u) => {
-    // Search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      if (
-        !u.name.toLowerCase().includes(term) &&
-        !u.email.toLowerCase().includes(term)
-      ) {
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) => {
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        if (!u.name.toLowerCase().includes(term) && !u.email.toLowerCase().includes(term)) {
+          return false;
+        }
+      }
+
+      if (roleFilter !== "all" && u.role !== roleFilter) {
         return false;
       }
-    }
 
-    // Role filter
-    if (roleFilter !== "all" && u.role !== roleFilter) {
-      return false;
-    }
+      if (statusFilter !== "all" && u.status !== statusFilter) {
+        return false;
+      }
 
-    // Status filter
-    if (statusFilter !== "all" && u.status !== statusFilter) {
-      return false;
-    }
-
-    return true;
-  });
+      return true;
+    });
+  }, [users, searchTerm, roleFilter, statusFilter]);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("es-ES", {
@@ -141,31 +135,7 @@ export default function UsersPage() {
     });
   };
 
-  const getRoleColor = (role: UserRole) => {
-    switch (role) {
-      case "ADMIN":
-        return "bg-muted text-foreground";
-      case "MANAGER":
-        return "bg-muted text-foreground";
-      case "EMPLOYEE":
-        return "bg-muted text-foreground";
-      default:
-        return "bg-muted text-foreground";
-    }
-  };
-
-  const getStatusColor = (status: UserStatus) => {
-    switch (status) {
-      case "ACTIVE":
-        return "bg-muted text-foreground";
-      case "INACTIVE":
-        return "bg-muted text-foreground";
-      case "SUSPENDED":
-        return "bg-muted text-foreground";
-      default:
-        return "bg-muted text-foreground";
-    }
-  };
+  const badgeClassName = "bg-muted text-foreground";
 
   const getInitials = (name: string) => {
     return name
@@ -220,16 +190,24 @@ export default function UsersPage() {
     await changeUserStatus(user.id, newStatus);
   };
 
-  const handleSubmitCreate = async () => {
-    setFormError("");
-
-    if (!formData.name || !formData.email || !formData.password) {
-      setFormError("Por favor completa todos los campos obligatorios");
-      return;
+  const validateUserForm = (isEditMode: boolean) => {
+    if (!formData.name || !formData.email || (!isEditMode && !formData.password)) {
+      return "Por favor completa todos los campos obligatorios";
     }
 
     if (formData.password && formData.password.length < 8) {
-      setFormError("La contraseña debe tener al menos 8 caracteres");
+      return "La contraseña debe tener al menos 8 caracteres";
+    }
+
+    return "";
+  };
+
+  const handleSubmitCreate = async () => {
+    setFormError("");
+
+    const validationError = validateUserForm(false);
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
@@ -246,8 +224,9 @@ export default function UsersPage() {
   const handleSubmitEdit = async () => {
     setFormError("");
 
-    if (!formData.name || !formData.email) {
-      setFormError("Por favor completa todos los campos obligatorios");
+    const validationError = validateUserForm(true);
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
@@ -443,12 +422,12 @@ export default function UsersPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge className={getRoleColor(u.role)}>
+                          <Badge className={badgeClassName}>
                             {ROLE_LABELS[u.role]}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge className={getStatusColor(u.status)}>
+                          <Badge className={badgeClassName}>
                             {USER_STATUS_LABELS[u.status]}
                           </Badge>
                         </TableCell>
@@ -738,13 +717,13 @@ export default function UsersPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Rol</p>
-                  <Badge className={getRoleColor(selectedUser.role)}>
+                  <Badge className={badgeClassName}>
                     {ROLE_LABELS[selectedUser.role]}
                   </Badge>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Estado</p>
-                  <Badge className={getStatusColor(selectedUser.status)}>
+                  <Badge className={badgeClassName}>
                     {USER_STATUS_LABELS[selectedUser.status]}
                   </Badge>
                 </div>

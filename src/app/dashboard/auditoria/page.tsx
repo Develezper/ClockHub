@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   ClipboardList,
   Search,
-  Filter,
   Calendar,
-  User,
   FileText,
   LogIn,
   LogOut,
@@ -38,16 +36,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Modal } from "@/components/ui/modal";
 import { AppHeader } from "@/components/shared/AppHeader";
 import { useAuth } from "@/hooks/use-auth";
 import { useAudit } from "@/hooks/use-audit";
@@ -57,13 +48,12 @@ import {
   AUDIT_ENTITY_LABELS,
   type AuditLog,
   type AuditAction,
-  type AuditEntity,
 } from "@/types";
 
 export default function AuditPage() {
   const router = useRouter();
   const { user: currentUser, hasPermission } = useAuth();
-  const { auditLogs, getAuditLogs } = useAudit();
+  const { auditLogs, refreshAuditLogs } = useAudit();
   const { users } = useUsers();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,33 +69,35 @@ export default function AuditPage() {
     }
   }, [currentUser, hasPermission, router]);
 
-  // Filter audit logs
-  const filteredLogs = auditLogs.filter((log) => {
-    // Search filter
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      const logUser = users.find((u) => u.id === log.userId);
-      if (
-        !logUser?.name.toLowerCase().includes(term) &&
-        !log.entity.toLowerCase().includes(term) &&
-        !log.action.toLowerCase().includes(term)
-      ) {
+  const usersById = useMemo(() => {
+    return new Map(users.map((u) => [u.id, u]));
+  }, [users]);
+
+  const filteredLogs = useMemo(() => {
+    return auditLogs.filter((log) => {
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const logUser = usersById.get(log.userId);
+        if (
+          !logUser?.name.toLowerCase().includes(term) &&
+          !log.entity.toLowerCase().includes(term) &&
+          !log.action.toLowerCase().includes(term)
+        ) {
+          return false;
+        }
+      }
+
+      if (actionFilter !== "all" && log.action !== actionFilter) {
         return false;
       }
-    }
 
-    // Action filter
-    if (actionFilter !== "all" && log.action !== actionFilter) {
-      return false;
-    }
+      if (entityFilter !== "all" && log.entity !== entityFilter) {
+        return false;
+      }
 
-    // Entity filter
-    if (entityFilter !== "all" && log.entity !== entityFilter) {
-      return false;
-    }
-
-    return true;
-  });
+      return true;
+    });
+  }, [auditLogs, searchTerm, actionFilter, entityFilter, usersById]);
 
   const formatDateTime = (date: Date) => {
     return new Date(date).toLocaleString("es-ES", {
@@ -152,39 +144,8 @@ export default function AuditPage() {
     }
   };
 
-  const getActionColor = (action: AuditAction) => {
-    switch (action) {
-      case "CREATE":
-        return "bg-muted text-foreground";
-      case "UPDATE":
-        return "bg-muted text-foreground";
-      case "DELETE":
-        return "bg-muted text-foreground";
-      case "LOGIN":
-        return "bg-muted text-foreground";
-      case "LOGOUT":
-        return "bg-muted text-foreground";
-      case "ROLE_CHANGE":
-        return "bg-muted text-foreground";
-      case "STATUS_CHANGE":
-        return "bg-muted text-foreground";
-      default:
-        return "bg-muted text-foreground";
-    }
-  };
-
-  const getEntityColor = (entity: AuditEntity) => {
-    switch (entity) {
-      case "USER":
-        return "bg-muted text-foreground border-border";
-      case "SCHEDULE":
-        return "bg-muted text-foreground border-border";
-      case "AUTH":
-        return "bg-muted text-foreground border-border";
-      default:
-        return "bg-muted text-foreground border-border";
-    }
-  };
+  const actionBadgeClass = "bg-muted text-foreground";
+  const entityBadgeClass = "bg-muted text-foreground border-border";
 
   const getInitials = (name: string) => {
     return name
@@ -199,15 +160,28 @@ export default function AuditPage() {
     setSelectedLog(log);
     setIsDetailOpen(true);
   };
+  const selectedLogUser = selectedLog ? users.find((u) => u.id === selectedLog.userId) : undefined;
 
-  // Stats
-  const todayLogs = auditLogs.filter(
-    (log) => new Date(log.createdAt).toDateString() === new Date().toDateString()
-  ).length;
-  const loginCount = auditLogs.filter((log) => log.action === "LOGIN").length;
-  const changeCount = auditLogs.filter(
-    (log) => log.action === "CREATE" || log.action === "UPDATE" || log.action === "DELETE"
-  ).length;
+  const { todayLogs, loginCount, changeCount } = useMemo(() => {
+    const today = new Date().toDateString();
+    let todayTotal = 0;
+    let loginTotal = 0;
+    let changeTotal = 0;
+
+    for (const log of auditLogs) {
+      if (new Date(log.createdAt).toDateString() === today) {
+        todayTotal += 1;
+      }
+      if (log.action === "LOGIN") {
+        loginTotal += 1;
+      }
+      if (log.action === "CREATE" || log.action === "UPDATE" || log.action === "DELETE") {
+        changeTotal += 1;
+      }
+    }
+
+    return { todayLogs: todayTotal, loginCount: loginTotal, changeCount: changeTotal };
+  }, [auditLogs]);
 
   if (!hasPermission("canViewAudit")) {
     return null;
@@ -226,7 +200,7 @@ export default function AuditPage() {
               Registro de todas las acciones del sistema
             </p>
           </div>
-          <Button variant="outline" className="h-9 px-4">
+          <Button variant="outline" className="h-9 px-4" onClick={() => void refreshAuditLogs()}>
             <RefreshCw className="mr-2 h-4 w-4" />
             Actualizar
           </Button>
@@ -341,13 +315,13 @@ export default function AuditPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredLogs.map((log) => {
-                      const logUser = users.find((u) => u.id === log.userId);
+                      const logUser = usersById.get(log.userId);
                       const ActionIcon = getActionIcon(log.action);
                       return (
                         <TableRow key={log.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${getActionColor(log.action)}`}>
+                              <div className={`p-2 rounded-lg ${actionBadgeClass}`}>
                                 <ActionIcon className="h-4 w-4" />
                               </div>
                               <span className="font-medium">
@@ -358,7 +332,7 @@ export default function AuditPage() {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={getEntityColor(log.entity)}
+                              className={entityBadgeClass}
                             >
                               {AUDIT_ENTITY_LABELS[log.entity]}
                             </Badge>
@@ -412,19 +386,23 @@ export default function AuditPage() {
       </div>
 
       {/* Detail Dialog */}
-      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Detalles del Evento</DialogTitle>
-            <DialogDescription>
-              Información completa del registro de auditoría
-            </DialogDescription>
-          </DialogHeader>
+      <Modal
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
+        title="Detalles del Evento"
+        description="Información completa del registro de auditoría"
+        contentClassName="sm:max-w-[600px]"
+        footer={
+          <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
+            Cerrar
+          </Button>
+        }
+      >
           {selectedLog && (
             <div className="space-y-4 py-4">
               {/* Action Badge */}
               <div className="flex items-center gap-4">
-                <div className={`p-3 rounded-xl ${getActionColor(selectedLog.action)}`}>
+                <div className={`p-3 rounded-xl ${actionBadgeClass}`}>
                   {(() => {
                     const ActionIcon = getActionIcon(selectedLog.action);
                     return <ActionIcon className="h-6 w-6" />;
@@ -436,7 +414,7 @@ export default function AuditPage() {
                   </h3>
                   <Badge
                     variant="outline"
-                    className={getEntityColor(selectedLog.entity)}
+                    className={entityBadgeClass}
                   >
                     {AUDIT_ENTITY_LABELS[selectedLog.entity]}
                   </Badge>
@@ -451,17 +429,15 @@ export default function AuditPage() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
-                      {users.find((u) => u.id === selectedLog.userId)
-                        ? getInitials(users.find((u) => u.id === selectedLog.userId)!.name)
-                        : "?"}
+                      {selectedLogUser ? getInitials(selectedLogUser.name) : "?"}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-medium">
-                      {users.find((u) => u.id === selectedLog.userId)?.name || "Desconocido"}
+                      {selectedLogUser?.name || "Desconocido"}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {users.find((u) => u.id === selectedLog.userId)?.email}
+                      {selectedLogUser?.email}
                     </p>
                   </div>
                 </div>
@@ -519,13 +495,7 @@ export default function AuditPage() {
               )}
             </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailOpen(false)}>
-              Cerrar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      </Modal>
     </div>
   );
 }

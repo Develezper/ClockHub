@@ -2,22 +2,12 @@
 
 import { createContext, useContext, useReducer, useCallback, useEffect, type ReactNode } from "react";
 import { getAuditLogsAction } from "@/actions/audit";
-import type { AuditLog, AuditAction, AuditEntity } from "@/types";
+import type { AuditLog } from "@/types";
 
 interface AuditContextType {
   auditLogs: AuditLog[];
   isLoading: boolean;
-  getAuditLogs: (filters?: AuditFilters) => AuditLog[];
-  addAuditLog: (log: Omit<AuditLog, "id" | "createdAt">) => void;
   refreshAuditLogs: () => Promise<void>;
-}
-
-interface AuditFilters {
-  entity?: AuditEntity;
-  action?: AuditAction;
-  userId?: string;
-  startDate?: Date;
-  endDate?: Date;
 }
 
 type AuditState = {
@@ -28,8 +18,7 @@ type AuditState = {
 type AuditActionType =
   | { type: "LOAD_START" }
   | { type: "LOAD_SUCCESS"; payload: AuditLog[] }
-  | { type: "LOAD_END" }
-  | { type: "APPEND"; payload: AuditLog };
+  | { type: "LOAD_END" };
 
 const initialState: AuditState = {
   auditLogs: [],
@@ -44,8 +33,6 @@ function auditReducer(state: AuditState, action: AuditActionType): AuditState {
       return { auditLogs: action.payload, isLoading: false };
     case "LOAD_END":
       return { ...state, isLoading: false };
-    case "APPEND":
-      return { ...state, auditLogs: [action.payload, ...state.auditLogs] };
     default:
       return state;
   }
@@ -75,53 +62,11 @@ export function AuditProvider({ children }: { children: ReactNode }) {
     void refreshAuditLogs();
   }, [refreshAuditLogs]);
 
-  const getAuditLogs = useCallback(
-    (filters?: AuditFilters) => {
-      let filtered = [...state.auditLogs];
-
-      if (filters?.entity) {
-        filtered = filtered.filter((log) => log.entity === filters.entity);
-      }
-
-      if (filters?.action) {
-        filtered = filtered.filter((log) => log.action === filters.action);
-      }
-
-      if (filters?.userId) {
-        filtered = filtered.filter((log) => log.userId === filters.userId);
-      }
-
-      if (filters?.startDate) {
-        filtered = filtered.filter((log) => new Date(log.createdAt) >= filters.startDate!);
-      }
-
-      if (filters?.endDate) {
-        filtered = filtered.filter((log) => new Date(log.createdAt) <= filters.endDate!);
-      }
-
-      return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    },
-    [state.auditLogs],
-  );
-
-  const addAuditLog = useCallback((log: Omit<AuditLog, "id" | "createdAt">) => {
-    dispatch({
-      type: "APPEND",
-      payload: {
-        ...log,
-        id: String(Date.now()),
-        createdAt: new Date(),
-      },
-    });
-  }, []);
-
   return (
     <AuditContext.Provider
       value={{
         auditLogs: state.auditLogs,
         isLoading: state.isLoading,
-        getAuditLogs,
-        addAuditLog,
         refreshAuditLogs,
       }}
     >

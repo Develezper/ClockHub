@@ -16,7 +16,7 @@ interface ScheduleContextType {
   isLoading: boolean;
   getSchedules: (userId?: string) => Schedule[];
   getScheduleById: (id: string) => Schedule | undefined;
-  createSchedule: (data: ScheduleFormData, createdBy: string) => Promise<MutationResult>;
+  createSchedule: (data: ScheduleFormData) => Promise<MutationResult>;
   updateSchedule: (id: string, data: Partial<ScheduleFormData>) => Promise<MutationResult>;
   deleteSchedule: (id: string) => Promise<MutationResult>;
   checkConflicts: (userId: string, startTime: Date, endTime: Date, excludeId?: string) => boolean;

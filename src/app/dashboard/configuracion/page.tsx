@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 import {
-  Settings,
   User,
   Bell,
   Shield,
-  Palette,
   Globe,
   Save,
   Camera,
