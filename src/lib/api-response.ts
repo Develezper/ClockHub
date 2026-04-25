@@ -29,36 +29,17 @@ export function fail(message: string, status = 400, code?: string) {
   );
 }
 
+const STATUS_MAP: Record<string, number> = {
+  UNAUTHORIZED: 401, INVALID_TOKEN: 401, INVALID_SESSION: 401,
+  MISSING_REFRESH_TOKEN: 401, INVALID_REFRESH_TOKEN: 401,
+  FORBIDDEN: 403, SELF_DELETE_FORBIDDEN: 403,
+  USER_NOT_FOUND: 404, SCHEDULE_NOT_FOUND: 404,
+  EMAIL_TAKEN: 409, SCHEDULE_CONFLICT: 409,
+  VALIDATION_ERROR: 400, INVALID_USER: 400, INVALID_SCHEDULE: 400,
+};
+
 export function statusFromCode(code?: string): number {
-  switch (code) {
-    case "UNAUTHORIZED":
-    case "INVALID_TOKEN":
-    case "INVALID_SESSION":
-    case "MISSING_REFRESH_TOKEN":
-    case "INVALID_REFRESH_TOKEN":
-      return 401;
-    case "FORBIDDEN":
-    case "SELF_DELETE_FORBIDDEN":
-      return 403;
-    case "USER_NOT_FOUND":
-    case "SCHEDULE_NOT_FOUND":
-      return 404;
-    case "EMAIL_TAKEN":
-    case "SCHEDULE_CONFLICT":
-      return 409;
-    case "VALIDATION_ERROR":
-    case "INVALID_USER":
-    case "INVALID_SCHEDULE":
-      return 400;
-    case "INTERNAL_ERROR":
-    case "LOGIN_ERROR":
-    case "REGISTER_ERROR":
-    case "LOGOUT_ERROR":
-    case "TOKEN_ROTATION_ERROR":
-      return 500;
-    default:
-      return 500;
-  }
+  return (code && STATUS_MAP[code]) || 500;
 }
 
 export function fromActionResult<T>(result: ApiResponseBody<T>) {

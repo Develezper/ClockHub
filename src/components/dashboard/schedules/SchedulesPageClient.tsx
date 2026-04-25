@@ -16,9 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AppHeader } from "@/components/shared/AppHeader";
-import { useAuth } from "@/hooks/use-auth";
-import { useSchedule } from "@/context/ScheduleContext";
-import { useUsers } from "@/context/UserContext";
+import { useAuth, useSchedule, useUsers } from "@/hooks";
 import { formatDateTimeEs, getInitials } from "@/lib/format";
 import { SectionHeader } from "@/components/dashboard/common/SectionHeader";
 import { ScheduleFormDialog } from "@/components/dashboard/schedules/ScheduleFormDialog";

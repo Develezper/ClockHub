@@ -27,7 +27,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { AppHeader } from "@/components/shared/AppHeader";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks";
 import { getInitials } from "@/lib/format";
 import { ROLE_LABELS } from "@/types";
 import { USER_ROLE_BADGE_CLASS, USER_ROLE_TEXT_CLASS } from "@/lib/semantic-colors";

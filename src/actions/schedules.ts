@@ -1,6 +1,6 @@
 "use server";
 
-import { ScheduleStatus } from "@prisma/client";
+import type { ScheduleStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { writeAuditLog } from "@/lib/audit";
 import { getSessionActor } from "@/lib/session";
@@ -33,17 +33,13 @@ function toScheduleModel(schedule: {
   };
 }
 
+const UNAUTHORIZED = { success: false as const, message: "No autenticado", code: "UNAUTHORIZED" };
+const FORBIDDEN = { success: false as const, message: "No autorizado", code: "FORBIDDEN" };
+
 async function requireActor() {
   const actor = await getSessionActor();
-  if (!actor) {
-    return { ok: false as const, response: { success: false, message: "No autenticado", code: "UNAUTHORIZED" } };
-  }
-
-  return { ok: true as const, actor };
-}
-
-function canMutateSchedules(role: string): boolean {
-  return role === "ADMIN" || role === "MANAGER";
+  if (!actor) return null;
+  return actor;
 }
 
 async function canManagerAccessUser(actorId: number, actorTeamId: string | undefined, targetUserId: number) {
@@ -114,51 +110,33 @@ async function hasConflict(userId: number, startAt: Date, endAt: Date, excludeId
 }
 
 export async function getSchedulesAction(): Promise<ApiResponse<Schedule[]>> {
-  const auth = await requireActor();
-  if (!auth.ok) return auth.response;
+  const actor = await requireActor();
+  if (!actor) return UNAUTHORIZED;
 
   const where =
-    auth.actor.role === "ADMIN"
+    actor.role === "ADMIN"
       ? undefined
-      : auth.actor.role === "MANAGER"
-        ? auth.actor.teamId
-          ? {
-              OR: [{ userId: auth.actor.id }, { user: { teamId: auth.actor.teamId } }],
-            }
-          : { userId: auth.actor.id }
-        : { userId: auth.actor.id };
+      : actor.role === "MANAGER" && actor.teamId
+        ? { OR: [{ userId: actor.id }, { user: { teamId: actor.teamId } }] }
+        : { userId: actor.id };
 
-  const schedules = await db.schedule.findMany({
-    where,
-    orderBy: { startAt: "desc" },
-  });
+  const schedules = await db.schedule.findMany({ where, orderBy: { startAt: "desc" } });
 
-  return {
-    success: true,
-    message: "Horarios cargados",
-    data: schedules.map(toScheduleModel),
-  };
+  return { success: true, message: "Horarios cargados", data: schedules.map(toScheduleModel) };
 }
 
 export async function createScheduleAction(input: unknown): Promise<ApiResponse<Schedule>> {
-  const auth = await requireActor();
-  if (!auth.ok) return auth.response;
-
-  if (!canMutateSchedules(auth.actor.role)) {
-    return { success: false, message: "No autorizado", code: "FORBIDDEN" };
-  }
+  const actor = await requireActor();
+  if (!actor) return UNAUTHORIZED;
+  if (actor.role === "EMPLOYEE") return FORBIDDEN;
 
   const parsed = createScheduleSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: "Datos inválidos", code: "VALIDATION_ERROR" };
-  }
+  if (!parsed.success) return { success: false, message: "Datos inválidos", code: "VALIDATION_ERROR" };
 
   const userId = Number(parsed.data.userId);
-  if (!Number.isInteger(userId) || userId <= 0) {
-    return { success: false, message: "Usuario inválido", code: "INVALID_USER" };
-  }
+  if (!Number.isInteger(userId) || userId <= 0) return { success: false, message: "Usuario inválido", code: "INVALID_USER" };
 
-  const allowedUser = await assertUserCanBeScheduled(auth.actor, userId);
+  const allowedUser = await assertUserCanBeScheduled(actor, userId);
   if (!allowedUser.ok) return allowedUser.response;
 
   const startAt = new Date(parsed.data.startTime);
@@ -169,67 +147,35 @@ export async function createScheduleAction(input: unknown): Promise<ApiResponse<
   }
 
   const schedule = await db.schedule.create({
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description,
-      startAt,
-      endAt,
-      userId,
-      createdById: auth.actor.id,
-      status: "ACTIVE",
-    },
+    data: { title: parsed.data.title, description: parsed.data.description, startAt, endAt, userId, createdById: actor.id, status: "ACTIVE" },
   });
 
-  await writeAuditLog({
-    action: "CREATE",
-    userId: auth.actor.id,
-    entity: "SCHEDULE",
-    entityId: String(schedule.id),
-    message: "Horario creado",
-    meta: { assignedUserId: userId, startAt, endAt },
-  });
+  await writeAuditLog({ action: "CREATE", userId: actor.id, entity: "SCHEDULE", entityId: String(schedule.id), message: "Horario creado", meta: { assignedUserId: userId, startAt, endAt } });
 
-  return {
-    success: true,
-    message: "Horario creado exitosamente",
-    data: toScheduleModel(schedule),
-  };
+  return { success: true, message: "Horario creado exitosamente", data: toScheduleModel(schedule) };
 }
 
 export async function updateScheduleAction(input: unknown): Promise<ApiResponse<Schedule>> {
-  const auth = await requireActor();
-  if (!auth.ok) return auth.response;
-
-  if (!canMutateSchedules(auth.actor.role)) {
-    return { success: false, message: "No autorizado", code: "FORBIDDEN" };
-  }
+  const actor = await requireActor();
+  if (!actor) return UNAUTHORIZED;
+  if (actor.role === "EMPLOYEE") return FORBIDDEN;
 
   const parsed = updateScheduleSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: "Datos inválidos", code: "VALIDATION_ERROR" };
-  }
+  if (!parsed.success) return { success: false, message: "Datos inválidos", code: "VALIDATION_ERROR" };
 
   const scheduleId = Number(parsed.data.id);
   const userId = Number(parsed.data.userId);
-
-  if (!Number.isInteger(scheduleId) || scheduleId <= 0) {
-    return { success: false, message: "Horario inválido", code: "INVALID_SCHEDULE" };
-  }
-
-  if (!Number.isInteger(userId) || userId <= 0) {
-    return { success: false, message: "Usuario inválido", code: "INVALID_USER" };
-  }
+  if (!Number.isInteger(scheduleId) || scheduleId <= 0) return { success: false, message: "Horario inválido", code: "INVALID_SCHEDULE" };
+  if (!Number.isInteger(userId) || userId <= 0) return { success: false, message: "Usuario inválido", code: "INVALID_USER" };
 
   const existing = await db.schedule.findUnique({ where: { id: scheduleId } });
-  if (!existing) {
-    return { success: false, message: "Horario no encontrado", code: "SCHEDULE_NOT_FOUND" };
-  }
+  if (!existing) return { success: false, message: "Horario no encontrado", code: "SCHEDULE_NOT_FOUND" };
 
-  const managerCanAccessExisting = await assertManagerCanAccessSchedule(auth.actor, existing.userId);
-  if (!managerCanAccessExisting.ok) return managerCanAccessExisting.response;
+  const accessCheck = await assertManagerCanAccessSchedule(actor, existing.userId);
+  if (!accessCheck.ok) return accessCheck.response;
 
-  const allowedTargetUser = await assertUserCanBeScheduled(auth.actor, userId);
-  if (!allowedTargetUser.ok) return allowedTargetUser.response;
+  const allowedTarget = await assertUserCanBeScheduled(actor, userId);
+  if (!allowedTarget.ok) return allowedTarget.response;
 
   const startAt = new Date(parsed.data.startTime);
   const endAt = new Date(parsed.data.endTime);
@@ -240,86 +186,37 @@ export async function updateScheduleAction(input: unknown): Promise<ApiResponse<
 
   const updated = await db.schedule.update({
     where: { id: scheduleId },
-    data: {
-      title: parsed.data.title,
-      description: parsed.data.description,
-      startAt,
-      endAt,
-      userId,
-      status: "ACTIVE",
-    },
+    data: { title: parsed.data.title, description: parsed.data.description, startAt, endAt, userId, status: "ACTIVE" },
   });
 
   await writeAuditLog({
-    action: "UPDATE",
-    userId: auth.actor.id,
-    entity: "SCHEDULE",
-    entityId: String(scheduleId),
-    message: "Horario actualizado",
-    meta: {
-      before: {
-        startAt: existing.startAt,
-        endAt: existing.endAt,
-        userId: existing.userId,
-      },
-      after: {
-        startAt: updated.startAt,
-        endAt: updated.endAt,
-        userId: updated.userId,
-      },
-    },
+    action: "UPDATE", userId: actor.id, entity: "SCHEDULE", entityId: String(scheduleId), message: "Horario actualizado",
+    meta: { before: { startAt: existing.startAt, endAt: existing.endAt, userId: existing.userId }, after: { startAt: updated.startAt, endAt: updated.endAt, userId: updated.userId } },
   });
 
-  return {
-    success: true,
-    message: "Horario actualizado exitosamente",
-    data: toScheduleModel(updated),
-  };
+  return { success: true, message: "Horario actualizado exitosamente", data: toScheduleModel(updated) };
 }
 
 export async function cancelScheduleAction(input: unknown): Promise<ApiResponse<{ id: string }>> {
-  const auth = await requireActor();
-  if (!auth.ok) return auth.response;
-
-  if (!canMutateSchedules(auth.actor.role)) {
-    return { success: false, message: "No autorizado", code: "FORBIDDEN" };
-  }
+  const actor = await requireActor();
+  if (!actor) return UNAUTHORIZED;
+  if (actor.role === "EMPLOYEE") return FORBIDDEN;
 
   const parsed = cancelScheduleSchema.safeParse(input);
-  if (!parsed.success) {
-    return { success: false, message: "Horario inválido", code: "VALIDATION_ERROR" };
-  }
+  if (!parsed.success) return { success: false, message: "Horario inválido", code: "VALIDATION_ERROR" };
 
   const scheduleId = Number(parsed.data.id);
-  if (!Number.isInteger(scheduleId) || scheduleId <= 0) {
-    return { success: false, message: "Horario inválido", code: "INVALID_SCHEDULE" };
-  }
+  if (!Number.isInteger(scheduleId) || scheduleId <= 0) return { success: false, message: "Horario inválido", code: "INVALID_SCHEDULE" };
 
   const existing = await db.schedule.findUnique({ where: { id: scheduleId } });
-  if (!existing) {
-    return { success: false, message: "Horario no encontrado", code: "SCHEDULE_NOT_FOUND" };
-  }
+  if (!existing) return { success: false, message: "Horario no encontrado", code: "SCHEDULE_NOT_FOUND" };
 
-  const managerCanAccessExisting = await assertManagerCanAccessSchedule(auth.actor, existing.userId);
-  if (!managerCanAccessExisting.ok) return managerCanAccessExisting.response;
+  const accessCheck = await assertManagerCanAccessSchedule(actor, existing.userId);
+  if (!accessCheck.ok) return accessCheck.response;
 
-  await db.schedule.update({
-    where: { id: scheduleId },
-    data: { status: "CANCELLED" },
-  });
+  await db.schedule.update({ where: { id: scheduleId }, data: { status: "CANCELLED" } });
 
-  await writeAuditLog({
-    action: "DELETE",
-    userId: auth.actor.id,
-    entity: "SCHEDULE",
-    entityId: String(scheduleId),
-    message: "Horario cancelado (soft delete)",
-    meta: { oldStatus: existing.status, newStatus: "CANCELLED" },
-  });
+  await writeAuditLog({ action: "DELETE", userId: actor.id, entity: "SCHEDULE", entityId: String(scheduleId), message: "Horario cancelado (soft delete)", meta: { oldStatus: existing.status, newStatus: "CANCELLED" } });
 
-  return {
-    success: true,
-    message: "Horario cancelado exitosamente",
-    data: { id: String(scheduleId) },
-  };
+  return { success: true, message: "Horario cancelado exitosamente", data: { id: String(scheduleId) } };
 }

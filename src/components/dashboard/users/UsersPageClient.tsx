@@ -17,8 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { AppHeader } from "@/components/shared/AppHeader";
-import { useAuth } from "@/hooks/use-auth";
-import { useUsers } from "@/context/UserContext";
+import { useAuth, useUsers } from "@/hooks";
 import { formatDateEs, getInitials } from "@/lib/format";
 import { SectionHeader } from "@/components/dashboard/common/SectionHeader";
 import { UserFormDialog } from "@/components/dashboard/users/UserFormDialog";

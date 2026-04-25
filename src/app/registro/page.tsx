@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks";
 
 export default function RegisterPage() {
   const router = useRouter();

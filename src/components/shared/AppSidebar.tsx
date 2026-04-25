@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks";
 import type { UserRole } from "@/types";
 
 const navigation: Array<{ name: string; href: string; roles: UserRole[] }> = [

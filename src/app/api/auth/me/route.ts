@@ -1,10 +1,9 @@
 import { cookies } from "next/headers";
 import { UserStatus } from "@prisma/client";
-import { ACCESS_COOKIE_NAME } from "@/lib/auth";
+import { ACCESS_COOKIE_NAME, toSafeAuthUser } from "@/lib/auth";
 import { fail, ok } from "@/lib/api-response";
-import { db } from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
-import { toSafeAuthUser } from "@/lib/auth-service";
+import { db } from "@/lib/db";
 
 export async function GET() {
   try {

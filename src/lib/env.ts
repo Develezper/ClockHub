@@ -51,7 +51,3 @@ export const env: AppEnv = {
 };
 
 export const isProduction = env.NODE_ENV === "production";
-
-export function getOptionalEnv(key: string): string | undefined {
-  return readEnv(key);
-}

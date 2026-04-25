@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
   try {
     const { id } = await context.params;
-    const result = await updateScheduleAction({ ...body, id });
+    const result = await updateScheduleAction({ ...(body as Record<string, unknown>), id });
     return fromActionResult(result);
   } catch {
     return fail("No se pudo procesar la solicitud", 500, "INTERNAL_ERROR");

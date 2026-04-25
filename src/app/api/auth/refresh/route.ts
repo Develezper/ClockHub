@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
 import { UserStatus } from "@prisma/client";
-import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME, setAuthCookies } from "@/lib/auth";
+import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME, setAuthCookies, issueTokenPair, toSafeAuthUser } from "@/lib/auth";
 import { fail, ok } from "@/lib/api-response";
 import { verifyToken } from "@/lib/jwt";
 import { db } from "@/lib/db";
-import { issueTokenPair, toSafeAuthUser } from "@/lib/auth-service";
 
 export async function POST(request: NextRequest) {
   try {

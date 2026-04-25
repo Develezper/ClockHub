@@ -15,9 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/shared/AppHeader";
-import { useAuth } from "@/hooks/use-auth";
-import { useAudit } from "@/hooks/use-audit";
-import { useUsers } from "@/context/UserContext";
+import { useAuth, useAudit, useUsers } from "@/hooks";
 import { formatDateTimeEs, getInitials } from "@/lib/format";
 import { SectionHeader } from "@/components/dashboard/common/SectionHeader";
 import { AuditDetailModal } from "@/components/dashboard/audit/AuditDetailModal";

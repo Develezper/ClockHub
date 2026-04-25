@@ -2,10 +2,8 @@ import { NextRequest } from "next/server";
 import { Role, UserStatus } from "@prisma/client";
 import { fail, ok } from "@/lib/api-response";
 import { db } from "@/lib/db";
-import { sanitizeEmail, setAuthCookies } from "@/lib/auth";
+import { sanitizeEmail, setAuthCookies, hashPassword, issueTokenPair, toSafeAuthUser } from "@/lib/auth";
 import { registerSchema } from "@/schemas/auth";
-import { hashPassword } from "@/lib/hash";
-import { issueTokenPair, toSafeAuthUser } from "@/lib/auth-service";
 import { writeAuditLog } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {

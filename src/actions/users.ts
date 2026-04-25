@@ -2,7 +2,7 @@
 
 import { Role, UserStatus } from "@prisma/client";
 import { db } from "@/lib/db";
-import { hashPassword } from "@/lib/hash";
+import { hashPassword } from "@/lib/auth";
 import { writeAuditLog } from "@/lib/audit";
 import { getSessionActor } from "@/lib/session";
 import { createUserSchema, updateUserRoleSchema, updateUserSchema, updateUserStatusSchema } from "@/schemas/user";

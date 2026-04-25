@@ -6,16 +6,18 @@ import type { UserRole } from "@/types";
 
 function unauthorizedApiResponse() {
   return NextResponse.json(
-    {
-      success: false,
-      message: "No autenticado",
-      code: "UNAUTHORIZED",
-    },
+    { success: false, message: "No autenticado", code: "UNAUTHORIZED" },
     { status: 401 },
   );
 }
 
-export async function proxy(request: NextRequest) {
+function redirectToLogin(request: NextRequest) {
+  const loginUrl = new URL("/login", request.url);
+  loginUrl.searchParams.set("next", request.nextUrl.pathname);
+  return NextResponse.redirect(loginUrl);
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/api/auth")) {
@@ -25,13 +27,7 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get(ACCESS_COOKIE_NAME)?.value;
 
   if (!token) {
-    if (pathname.startsWith("/api/")) {
-      return unauthorizedApiResponse();
-    }
-
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    return pathname.startsWith("/api/") ? unauthorizedApiResponse() : redirectToLogin(request);
   }
 
   try {
@@ -39,27 +35,16 @@ export async function proxy(request: NextRequest) {
     const role = payload.role as UserRole;
 
     if (pathname.startsWith("/dashboard") && !isPathAllowedByRole(pathname, role)) {
-      const fallbackUrl = new URL("/dashboard", request.url);
-      return NextResponse.redirect(fallbackUrl);
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-user-id", payload.sub);
     requestHeaders.set("x-user-role", role);
 
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return NextResponse.next({ request: { headers: requestHeaders } });
   } catch {
-    if (pathname.startsWith("/api/")) {
-      return unauthorizedApiResponse();
-    }
-
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
+    return pathname.startsWith("/api/") ? unauthorizedApiResponse() : redirectToLogin(request);
   }
 }
 

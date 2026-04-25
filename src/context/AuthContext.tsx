@@ -62,37 +62,7 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-type PermissionMap = { [K in keyof typeof ROLE_PERMISSIONS.ADMIN]: boolean };
 
-const PERMISSIONS_BY_ROLE: Record<UserRole, PermissionMap> = {
-  ADMIN: {
-    canViewAllSchedules: true,
-    canCreateSchedules: true,
-    canEditSchedules: true,
-    canDeleteSchedules: true,
-    canManageUsers: true,
-    canViewAudit: true,
-    canChangeRoles: true,
-  },
-  MANAGER: {
-    canViewAllSchedules: false,
-    canCreateSchedules: true,
-    canEditSchedules: true,
-    canDeleteSchedules: true,
-    canManageUsers: false,
-    canViewAudit: true,
-    canChangeRoles: false,
-  },
-  EMPLOYEE: {
-    canViewAllSchedules: false,
-    canCreateSchedules: false,
-    canEditSchedules: false,
-    canDeleteSchedules: false,
-    canManageUsers: false,
-    canViewAudit: false,
-    canChangeRoles: false,
-  },
-};
 
 function toContextUser(user: SessionUser): User {
   return {
@@ -267,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasPermission = useCallback(
     (permission: keyof typeof ROLE_PERMISSIONS.ADMIN) => {
       if (!state.user) return false;
-      return PERMISSIONS_BY_ROLE[state.user.role][permission];
+      return ROLE_PERMISSIONS[state.user.role][permission];
     },
     [state.user],
   );

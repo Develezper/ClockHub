@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/shared/AppSidebar";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks";
 import { ScheduleProvider } from "@/context/ScheduleContext";
 import { UserProvider } from "@/context/UserContext";
 import { AuditProvider } from "@/context/AuditContext";

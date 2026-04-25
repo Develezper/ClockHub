@@ -1,7 +1,6 @@
-import { AuditAction, Role, ScheduleStatus, UserStatus } from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
+import { AuditAction, PrismaClient, Role, ScheduleStatus, UserStatus } from "@prisma/client";
 import { readFile } from "node:fs/promises";
-import { hashPassword } from "../src/lib/hash";
+import { hashPassword } from "../src/lib/auth";
 
 const prisma = new PrismaClient();
 

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks";
 import { ROLE_LABELS } from "@/types";
 import { USER_ROLE_BADGE_CLASS } from "@/lib/semantic-colors";
 
