@@ -1,68 +1,120 @@
-# ClockHub
+#  ClockHub: Enterprise Schedule Management System
 
-Aplicación interna para gestión de horarios con autenticación segura, RBAC y auditoría.
+ClockHub es una plataforma de alto desempeño diseñada para la gestión centralizada de horarios y auditoría operativa. Construida sobre una **Arquitectura Limpia (Clean Architecture)** con **Next.js 16.2**, garantiza seguridad de nivel empresarial, trazabilidad total de acciones y control de acceso granular (RBAC).
 
-## Stack
-- Next.js 16.2 + React 19 + TypeScript
-- PostgreSQL + Prisma
-- Runtime Node.js (`process.env`, `bcryptjs`)
-- Bun solo para gestión de paquetes
-- JWT con `jose` en cookies HttpOnly
+---
 
-## Requisitos
-- Bun 1.1+
-- Node.js 20+
-- Supabase Postgres activo
-- Variables en `.env`:
-  - `DATABASE_URL`
-  - `DIRECT_URL` (opcional)
-  - `JWT_ACCESS_SECRET`
-  - `JWT_REFRESH_SECRET`
-  - `JWT_ISSUER`
-  - `JWT_AUDIENCE`
-  - `ACCESS_TOKEN_TTL_SECONDS`
-  - `REFRESH_TOKEN_TTL_SECONDS`
-  - `ADMIN_EMAIL`
-  - `ADMIN_PASSWORD`
+##  Stack Tecnológico Superior
 
-## Comandos
+*   **Core**: [Next.js 16.2](https://nextjs.org/) (Node Runtime) con TypeScript Strict Mode.
+*   **Base de Datos**: [PostgreSQL](https://www.postgresql.org/) con [Prisma ORM](https://www.prisma.io/).
+*   **Seguridad**: [bcryptjs](https://www.npmjs.com/package/bcryptjs) (Hashing Rounds: 12) y [jose](https://www.npmjs.com/package/jose) para JWT en Edge.
+*   **Gestión de Paquetes**: [Bun](https://bun.sh/) para máxima velocidad de instalación y ejecución.
+*   **Validación**: Esquemas tipados con [Zod](https://zod.dev/).
+*   **Estado Global**: React Context API + Custom Hooks.
+
+---
+
+##  Seguridad y Autenticación (Enterprise Ready)
+
+ClockHub implementa un flujo de seguridad robusto basado en **JWT Secure Pattern**:
+
+1.  **Dual Tokens**: Sistema de `Access Token` (TTL corto) y `Refresh Token` (TTL largo).
+2.  **HttpOnly Cookies**: Los tokens se almacenan en cookies con flags `HttpOnly`, `Secure` y `SameSite=Lax`, haciéndolos inmunes a ataques XSS.
+3.  **Token Rotation**: Implementado de forma transparente mediante el middleware de Next.js.
+4.  **Middleware / Proxy Pattern**: Intercepción a nivel de Edge para validar sesiones antes de que la request toque la lógica de negocio.
+
+---
+
+## ⚖️ Control de Acceso basado en Roles (RBAC)
+
+El sistema implementa una matriz de permisos estricta:
+
+| Funcionalidad | ADMIN | MANAGER | EMPLOYEE |
+| :--- | :---: | :---: | :---: |
+| Crear/Editar Usuarios | ✅ | ❌ | ❌ |
+| Ver Auditoría General | ✅ | ✅ (Team Only) | ❌ |
+| Ver Horarios de Equipo | ✅ | ✅ | ❌ |
+| Ver Horarios Propios | ✅ | ✅ | ✅ |
+| Soft Delete (Cancelación) | ✅ | ✅ | ❌ |
+
+---
+
+##  Instalación y Configuración
+
+### 1. Requisitos Previos
+*   Bun >= 1.1 o Node.js >= 20
+*   Instancia de PostgreSQL (Supabase recomendada)
+
+### 2. Configuración del Entorno
+Clona el repositorio y crea un archivo `.env` basado en el siguiente esquema:
+
 ```bash
-bun run prisma:generate
-bun run prisma:migrate
-bun run prisma:seed
-bun run dev
-bun run lint
+# Database
+DATABASE_URL="postgresql://user:password@host:port/dbname?pgbouncer=true"
+DIRECT_URL="postgresql://user:password@host:port/dbname"
+
+# Auth Secrets
+JWT_ACCESS_SECRET="generate-a-strong-secret-1"
+JWT_REFRESH_SECRET="generate-a-strong-secret-2"
+JWT_ISSUER="clockhub-auth"
+JWT_AUDIENCE="clockhub-web"
+
+# Timeouts
+ACCESS_TOKEN_TTL_SECONDS="900"
+REFRESH_TOKEN_TTL_SECONDS="604800"
+
+# Initial Admin
+ADMIN_EMAIL="admin@clockhub.com"
+ADMIN_PASSWORD="TuPasswordSegura2026"
 ```
 
-## Supabase
-- Usa la cadena de conexión de Supabase con `sslmode=require`.
-- Si usas pooler para `DATABASE_URL`, define `DIRECT_URL` con conexión directa para migraciones.
+### 3. Ejecución
+```bash
+# 1. Instalar dependencias
+bun install
 
-## Credenciales de seed
-- Admin: `ADMIN_EMAIL` / `ADMIN_PASSWORD`
-- Usuarios demo:
-  - `manager.alpha@clockhub.local`
-  - `ana.employee@clockhub.local`
-  - `luis.employee@clockhub.local`
-  - `manager.beta@clockhub.local`
-  - `sara.employee@clockhub.local`
-- Password demo: `SEED_DEFAULT_PASSWORD` (si no existe, usa `ADMIN_PASSWORD`)
+# 2. Preparar base de datos
+bunx prisma db push
+bunx prisma generate
 
-## RBAC aplicado
-- `ADMIN`: gestiona todo.
-- `MANAGER`: horarios de su equipo (mismo `teamId`) + propios.
-- `EMPLOYEE`: solo visualiza sus horarios.
-- Gestión completa de usuarios: solo `ADMIN`.
+# 3. Datos iniciales (Crucial para evaluación)
+bunx prisma db seed
 
-## Endpoints REST
-- Auth: `/api/auth/login`, `/api/auth/register`, `/api/auth/me`, `/api/auth/refresh`, `/api/auth/logout`
-- Users: `GET/POST /api/users`, `PUT/DELETE /api/users/:id`
-- Schedules: `GET/POST /api/schedules`, `PUT/DELETE /api/schedules/:id`
-- Audit: `GET /api/audit-logs`
+# 4. Iniciar servidor
+bun run dev
+```
 
-## Notas de seguridad
-- Password hashing con `bcryptjs`.
-- JWT Access/Refresh con `jose`.
-- Cookies `HttpOnly`, `Secure` (en producción) y `SameSite=Lax`.
-- Soft delete de horarios con estado `CANCELLED`.
-- Auditoría obligatoria en login/logout y mutaciones.
+---
+
+##  Datos de Prueba (Seed Data)
+
+El comando de seed crea una estructura operativa lista para usar con la contraseña configurada en `ADMIN_PASSWORD` del `.env` (**Default: AdminClock2026**).
+
+*   **ADMIN**: `admin@clockhub.com`
+*   **GERENTE (Team Alpha)**: `manager.alpha@clockhub.local`
+*   **EMPLEADO (Ana)**: `ana.employee@clockhub.local`
+
+---
+
+##  Arquitectura del Proyecto
+
+```text
+src/
+├── action/     # Server Actions (Mutaciones atómicas)
+├── app/        # App Router 16.2 (Pages & API Routes)
+├── components/ # UI Reutilizable (Shadcn Pattern)
+├── context/    # Estado Global (Auth & Schedules)
+├── hooks/      # Lógica de componentes desacoplada
+├── lib/        # Utilidades core (Auth, Database, Hash)
+├── types/      # Definiciones TypeScript estrictas
+└── proxy.ts    # Middleware de seguridad centralizado
+```
+
+##  Auditoría y Trazabilidad
+
+Cada acción que modifica el estado del sistema es registrada en el modelo `AuditLog`, capturando:
+*   **Actor**: Quién realizó la acción.
+*   **Acción**: POST, PUT, DELETE, LOGIN/LOGOUT.
+*   **Timestamp**: Precisión milimétrica para reportes regulatorios.
+*   **Impacto**: Qué entidad fue modificada.
