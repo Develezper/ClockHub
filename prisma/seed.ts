@@ -154,18 +154,13 @@ async function main() {
     });
   }
 
-  console.log("Seed completado");
-  console.log(`Admin: ${adminEmail}`);
-  console.log(`Password admin: ${adminPassword}`);
-  console.log(`Password usuarios demo: ${samplePassword}`);
 }
 
 main()
   .then(async () => {
     await prisma.$disconnect();
   })
-  .catch(async (error) => {
-    console.error("Seed failed", error);
+  .catch(async () => {
     await prisma.$disconnect();
     process.exit(1);
   });
