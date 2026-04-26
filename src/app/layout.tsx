@@ -27,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark scroll-smooth" suppressHydrationWarning>
+    <html lang="es" className="dark scroll-smooth" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased bg-background text-foreground`}>
         <AuthProvider>{children}</AuthProvider>
         {isProduction && <Analytics />}
