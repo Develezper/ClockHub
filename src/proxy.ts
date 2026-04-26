@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ACCESS_COOKIE_NAME } from "@/lib/auth";
+import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME, issueTokenPair } from "@/lib/auth";
 import { verifyToken } from "@/lib/jwt";
+import { db } from "@/lib/db";
+import { env, isProduction } from "@/lib/env";
 import { isPathAllowedByRole } from "@/constants/role-routes";
 import type { UserRole } from "@/types";
 
@@ -17,7 +19,7 @@ function redirectToLogin(request: NextRequest) {
   return NextResponse.redirect(loginUrl);
 }
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/api/auth")) {
@@ -32,20 +34,73 @@ export async function proxy(request: NextRequest) {
 
   try {
     const payload = await verifyToken(token, "access");
-    const role = payload.role as UserRole;
-
-    if (pathname.startsWith("/dashboard") && !isPathAllowedByRole(pathname, role)) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+    return handleAllowedRequest(request, payload.sub, payload.role as UserRole);
+  } catch (error: any) {
+    // If expired, try to refresh
+    if (error.code === "ERR_JWT_EXPIRED" || error.message?.includes("expired")) {
+      const refreshToken = request.cookies.get(REFRESH_COOKIE_NAME)?.value;
+      
+      if (refreshToken) {
+        try {
+          const refreshPayload = await verifyToken(refreshToken, "refresh");
+          const userId = Number(refreshPayload.sub);
+          
+          const user = await db.user.findUnique({ 
+            where: { id: userId },
+            select: { id: true, email: true, role: true, status: true }
+          });
+          
+          if (user && user.status === "ACTIVE") {
+            const { accessToken, refreshToken: newRefreshToken } = await issueTokenPair(user);
+            
+            // Continue request with new token info
+            const response = await handleAllowedRequest(request, String(user.id), user.role as UserRole);
+            
+            // Set new cookies
+            response.cookies.set(ACCESS_COOKIE_NAME, accessToken, {
+              httpOnly: true,
+              secure: isProduction,
+              sameSite: "lax",
+              path: "/",
+              maxAge: env.ACCESS_TOKEN_TTL_SECONDS
+            });
+            
+            response.cookies.set(REFRESH_COOKIE_NAME, newRefreshToken, {
+              httpOnly: true,
+              secure: isProduction,
+              sameSite: "lax",
+              path: "/",
+              maxAge: env.REFRESH_TOKEN_TTL_SECONDS
+            });
+            
+            return response;
+          }
+        } catch {
+          // Refresh failed
+        }
+      }
     }
-
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-user-id", payload.sub);
-    requestHeaders.set("x-user-role", role);
-
-    return NextResponse.next({ request: { headers: requestHeaders } });
-  } catch {
+    
     return pathname.startsWith("/api/") ? unauthorizedApiResponse() : redirectToLogin(request);
   }
+}
+
+async function handleAllowedRequest(request: NextRequest, userId: string, role: UserRole) {
+  const { pathname } = request.nextUrl;
+  
+  if (pathname.startsWith("/dashboard") && !isPathAllowedByRole(pathname, role)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-user-id", userId);
+  requestHeaders.set("x-user-role", role);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 export const config = {
